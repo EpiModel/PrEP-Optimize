@@ -9,6 +9,8 @@ scp intervention/sim.R intervention/runsim.sh intervention/master.lhs.sh mox:/gs
 # Receive
 scp mox:/gscratch/csde/sjenness/poptim/data/*.rda intervention/data/
 
+scp mox:/gscratch/csde/sjenness/poptim/data/hold/prepOptim*.rda analysis/data/
+
 
 ## IKT ##
 

@@ -109,30 +109,57 @@ dfr <- group_by(dfr, years) %>%
 dfr$PSP <- sim$param$prep.start.prob
 dfr$PHA <- sim$param$prep.adhr.dist[3]
 dfr$PDR <- sim$param$prep.discont.rate
-dfr$inf.avert <- NA
+dfr$infAvert <- NA
 dfr$scenario <- "n1000"
+dfr <- select(dfr, scenario, PSP, PHA, PDR, everything())
 dfr
 
-dfr.tot <- data.frame(incid = sum(dfr$incid), s.num = sum(dfr$s.num),
+dfr.tot <- data.frame(scenario = dfr$scenario[1], PSP = dfr$PSP[1], PHA = dfr$PHA[1], PDR = dfr$PDR[1],
+                      incid = sum(dfr$incid), s.num = sum(dfr$s.num),
                       prepCurr = sum(dfr$prepCurr), prepCurrHA = sum(dfr$prepCurrHA),
-                      prepRandSt = sum(dfr$prepRandSt),
-                      PSP = dfr$PSP[1], PHA = dfr$PHA[1], PDR = dfr$PDR[1],
-                      inf.avert = NA, scenario = dfr$scenario[1])
+                      prepRandSt = sum(dfr$prepRandSt), infAvert = NA)
 dfr.tot
 
 
 fn <- list.files("data/", pattern = "sim", full.names = TRUE)
 # fn <- fn[2]
 
+
+# create yearly dataset
+
 doParallel::registerDoParallel(parallel::detectCores())
 tdf <- foreach(i = 1:length(fn)) %dopar% {
-  counter_df(fn[i], dfr)
+  counter_df_byyear(fn[i], dfr)
 }
 
 tdf <- do.call("rbind", tdf)
-tdf
+dim(tdf)
+tdf <- select(tdf, scenario, PSP, PHA, PDR, everything())
+head(tdf)
 
 all <- rbind(dfr, tdf)
-all
+head(all, 30)
+
+all$PinfAvert <- all$infAvert/all$incid
+
+saveRDS(all, file = "data/hold/prepOptim-Yearly-v1.rda", compress = "xz")
 
 
+# create overall dataset
+
+doParallel::registerDoParallel(parallel::detectCores())
+tdf <- foreach(i = 1:length(fn)) %dopar% {
+  counter_df_overall(fn[i], dfr.tot)
+}
+
+tdf <- do.call("rbind", tdf)
+dim(tdf)
+tdf <- select(tdf, scenario, PSP, PHA, PDR, everything())
+head(tdf)
+
+all <- rbind(dfr.tot, tdf)
+head(all, 30)
+
+all$PinfAvert <- all$infAvert/all$incid
+
+saveRDS(all, file = "data/hold/prepOptim-Overall-v1.rda", compress = "xz")

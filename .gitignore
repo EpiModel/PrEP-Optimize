@@ -3,4 +3,8 @@
 .RData
 .Ruserdata
 *.DS_Store
-*.rda
+burnin/data/*.rda
+burnin/burnin2/data/*.rda
+est/*.rda
+estimation/*.rda
+intervention/data/*.rda
