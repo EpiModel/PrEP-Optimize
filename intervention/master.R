@@ -1,0 +1,57 @@
+
+## build master.sh script ##
+
+library("EpiModelHPC")
+
+# Reference Scenario ---------------------------------------------
+
+vars <- list(PSP = 0.66,
+             PHA = 0,
+             PRD = 224.4237)
+sbatch_master(vars = vars,
+              master.file = "intervention/master.sh",
+              runsim.file = "runsim.sh",
+              param.sheet = "intervention/params.csv",
+              simno.start = 1000,
+              ckpt = TRUE,
+              nsims = 250,
+              ncores = 28,
+              walltime = "00:30:00",
+              mem = "100G")
+
+
+# Counterfactual Scenarios ---------------------------------------------
+
+library("lhs")
+
+set.seed(12345)
+l <- randomLHS(1000, 3)
+
+PSP <- c(0.66, 1.00)
+PHA <- c(0.00, 0.216)
+PRD <- c(224.4237*1, 224.4237*4)
+
+PSPs <- (l[, 1]*(PSP[2]-PSP[1]))+PSP[1]
+PHAs <- (l[, 2]*(PHA[2]-PHA[1]))+PHA[1]
+PRDs <- (l[, 3]*(PRD[2]-PRD[1]))+PRD[1]
+
+vars <- list(PSP = PSPs,
+             PHA = PHAs,
+             PRD = PRDs)
+vars
+
+sbatch_master(vars = vars,
+              expand.vars = FALSE,
+              master.file = "intervention/master.lhs.sh",
+              runsim.file = "runsim.sh",
+              param.sheet = "intervention/params.csv",
+              simno.start = 1001,
+              append = FALSE,
+              ckpt = TRUE,
+              nsims = 500,
+              ncores = 28,
+              walltime = "00:30:00",
+              mem = "100G")
+
+
+
