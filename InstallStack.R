@@ -25,7 +25,7 @@ remotes::install_github(c("statnet/EpiModel",
                         upgrade = FALSE)
 
 # Current Version of EpiModelHIV for Project
-remotes::install_github("EpiModel/EpiModelHIV-p", ref = "CombPrev", upgrade = FALSE)
+remotes::install_github("EpiModel/EpiModelHIV-p", ref = "PrEP-Optim", upgrade = FALSE)
 
 
 # Package Listing ---------------------------------------------------------
