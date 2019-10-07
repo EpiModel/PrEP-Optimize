@@ -5,7 +5,6 @@ devtools::load_all("~/Dropbox/Dev/EpiModelHIV/EpiModelHIV-p")
 ## Parameters
 netstats <- readRDS("est/netstats.rda")
 epistats <- readRDS("est/epistats.rda")
-# burnin <- readRDS("est/burnin.ATL.3race.FSonly.Prep15.rda")
 burnin <- readRDS("est/burnin.ATL.3race.FSonly.rda")
 
 param <- param_msm(netstats = netstats,

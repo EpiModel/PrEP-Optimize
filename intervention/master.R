@@ -2,19 +2,21 @@
 ## build master.sh script ##
 
 library("EpiModelHPC")
+setwd("intervention/")
 
 # Reference Scenario ---------------------------------------------
 
-vars <- list(PSP = 0.66,
-             PHA = 0,
-             PRD = 224.4237)
+# vars <- list(PSP = 0.66,
+#              PHA = 0,
+#              PRD = 224.4237)
+vars <- list(PSP = c(0, 0.25, 0.5, seq(0.6, 0.8, 0.02)))
+# vars <- NULL
 sbatch_master(vars = vars,
-              master.file = "intervention/master.sh",
+              master.file = "master.sh",
               runsim.file = "runsim.sh",
-              param.sheet = "intervention/params.csv",
-              simno.start = 1000,
+              simno.start = 500,
               ckpt = TRUE,
-              nsims = 250,
+              nsims = 112,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")
