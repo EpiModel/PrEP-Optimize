@@ -4,6 +4,7 @@
 
 # Base EpiModel
 install.packages("EpiModel")
+install.packages("tidyverse", dep = TRUE)
 
 # Extra Helper Packages
 install.packages(c("remotes", "sessioninfo"))
@@ -19,8 +20,10 @@ remotes::install_github("statnet/tergm", ref = "d3af135", upgrade = FALSE)
 remotes::install_github(c("statnet/EpiModel",
                           "statnet/EpiModelHPC",
                           "statnet/tergmLite",
-                          "EpiModel/EpiABC",
-                          "EpiModel/ARTnetData",
+                          "EpiModel/EpiABC"),
+                        upgrade = FALSE)
+
+remotes::install_github(c("EpiModel/ARTnetData",
                           "EpiModel/ARTnet"),
                         upgrade = FALSE)
 
