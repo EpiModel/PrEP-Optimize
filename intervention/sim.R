@@ -4,7 +4,7 @@ library("methods")
 suppressMessages(library("EpiModelHIV"))
 
 ## Environmental Arguments
-pull_env_vars(num.vars = "PSP")
+pull_env_vars(num.vars = c("POIP", "PSPO", "POAC", "PADO", "PORC", "PDRO"))
 
 ## Parameters
 netstats <- readRDS("est/netstats.rda")
@@ -16,17 +16,19 @@ param <- param_msm(netstats = netstats,
                    trans.scale = c(2.21, 0.405, 0.255),
                    prep.start = (52*60) + 1,
                    riskh.start = 52*59,
-                   prep.start.prob = PSP, # 0.712,
+                   prep.adhr.hr = c(0.69, 0.19, 0.01),
+                   prep.start.prob = 0.715,
+                   prep.adhr.dist = reallocate_pcp(c(0.089, 0.127, 0.784), -0.184),
+                   prep.discont.rate = 1 - (2^(-1/(224.4/7))),
                    prep.require.lnt = TRUE,
                    prep.risk.reassess.method = "year",
-
-                   prep.optim.start = Inf, #(52*65) + 1,
-                   prep.optim.init.prob = 0,
-                   prep.start.prob.optim = 0.01,
-                   prep.optim.adhr.cap = 0,
-                   prep.adhr.dist.optim = reallocate_pcp(c(0.089, 0.127, 0.784), 0.2),
-                   prep.optim.retn.cap = 0,
-                   prep.discont.rate.optim = 1 - (2^(-1/(2*224.4237/7))))
+                   prep.optim.start = (52*65) + 1,
+                   prep.optim.init.prob = POIP,
+                   prep.start.prob.optim = PSPO,
+                   prep.optim.adhr.cap = POAC,
+                   prep.adhr.dist.optim = reallocate_pcp(c(0.089, 0.127, 0.784), -0.184+PADO),
+                   prep.optim.retn.cap = PORC,
+                   prep.discont.rate.optim = 1 - (2^(-1/(PDRO*224.4/7))))
 init <- init_msm()
 control <- control_msm(simno = fsimno,
                        start = (52*60) + 1,
@@ -42,5 +44,11 @@ sim <- netsim(burnin, param, init, control)
 
 # Merging
 savesim(sim, save.min = TRUE, save.max = FALSE)
+vars <- c("ir100", "incid", "num", "prepCurr", "prepElig",
+          "OptimInitStarts", "OptimInitPrev",
+          "PrEPStarts", "PrEPStartsOptim",
+          "OptimAdhrStarts", "OptimAdhrPrev", "PrEPHighAdr",
+          "OptimRetnStarts", "OptimRetnPrev",
+          "PrEPStopsInd", "PrEPStopsRand", "PrEPStopsRandOptim")
 process_simfiles(simno = simno, min.n = njobs, nsims = nsims,
-                 truncate.at = 52*60)
+                 truncate.at = 52*60, vars = vars)
