@@ -18,12 +18,12 @@ remotes::install_github(c("statnet/network@deff2a0",
                         upgrade = FALSE)
 
 # Latest Dev Versions of EpiModel Packages
-remotes::install_github(c("statnet/EpiModel",
-                          "statnet/EpiModelHPC",
-                          "statnet/tergmLite@v1.2.0",
-                          "EpiModel/EpiABC",
-                          "EpiModel/ARTnetData",
-                          "EpiModel/ARTnet@v1.0.0"),
+remotes::install_github(c("statnet/EpiModel@3914c98",
+                          "statnet/EpiModelHPC@257bbf3",
+                          "statnet/tergmLite@73d2a2d",
+                          "EpiModel/EpiABC@c32ecb6",
+                          "EpiModel/ARTnetData@c5ebaba",
+                          "EpiModel/ARTnet@150c631"),
                         upgrade = FALSE)
 
 # Current Version of EpiModelHIV for Project
