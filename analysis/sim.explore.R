@@ -9,7 +9,7 @@ sim <- NULL
 fn <- list.files("intervention/data/", pattern = "sim", full.names = TRUE)
 cbind(fn)
 
-load("intervention/data/sim.n505.rda")
+load("intervention/data/sim.n200.rda")
 
 sim$param$prep.start
 sim$param$prep.optim.start
@@ -21,15 +21,17 @@ sim$param$prep.optim.adhr.cap
 sim$param$prep.adhr.dist
 sim$param$prep.adhr.dist.optim
 sim$param$prep.adhr.hr
+sim$param$prep.discont.rate
 sim$param$prep.optim.retn.cap
 sim$param$prep.discont.rate.optim
 
-1 - (2^(-1/(10*224.4/7)))
+1 - (2^(-1/(1*224.4/7)))
 
 sim <- mutate_epi(sim, pFrac = prepCurr / prepElig,
                        pFracA = prepCurr / num,
                        pFracAO = OptimAdhrPrev / prepCurr,
-                       pFracRO = OptimRetnPrev / prepCurr)
+                       pFracRO = OptimRetnPrev / prepCurr,
+                       PrEPStopsRandT = PrEPStopsRand + PrEPStopsRandOptim)
 sim <- mutate_epi(sim, psrr = PrEPStopsRand / (prepCurr - OptimRetnPrev),
                        psrro = PrEPStopsRandOptim / OptimRetnPrev)
 df <- as.data.frame(sim, out = "mean")
@@ -39,10 +41,12 @@ names(df)
 
 par(mar = c(3,3,1,1), mgp = c(2,1,0))
 
-plot(sim, y = "ir100", ylim = c(0, 5), mean.smooth = FALSE)
+plot(sim, y = "ir100", ylim = c(0, 5), mean.smooth = FALSE, mean.lwd = 1, mean.col = "black")
 abline(v = 52*5, h = 1.29, lty = 2)
 calc_quants_ir(sim, "ir100")
 sum(df$incid)
+sum(tail(df$incid, 520))
+# (1169.184-sum(tail(df$incid, 520)))/1169.184
 
 plot(sim, y = "num", ylim = c(0, 20000))
 
@@ -52,6 +56,10 @@ calc_quants_prev(sim, "prepCurr", at = 781, mult = 1)
 plot(sim, y = c("pFrac", "pFracA"), ylim = c(0, 1), legend = TRUE, mean.smooth = FALSE)
 abline(v = 52*5, h = 0.15, lty = 2)
 calc_quants_prev(sim, "pFrac", at = 781, mult = 100)
+
+# Cumulative probabilty of starting PrEP per-year in base group and intervention group
+1-(1-mean(tail(df$PrEPStarts / (df$prepElig - df$OptimInitPrev), 52)))^52
+1-(1-mean(tail(df$PrEPStartsOptim / df$OptimInitPrev, 52)))^52
 
 plot(sim, y = "OptimInitStarts")
 plot(sim, y = "OptimInitStarts", mean.smooth = FALSE)
@@ -84,27 +92,20 @@ plot(sim, y = "PrEPStopsRand")
 calc_quants_ir(sim, "PrEPStopsRand", round = 1)
 plot(sim, y = "PrEPStopsRandOptim")
 calc_quants_ir(sim, "PrEPStopsRandOptim")
+plot(sim, y = "PrEPStopsRandT")
+calc_quants_ir(sim, "PrEPStopsRandT")
 
 plot(sim, y = c("psrr", "psrro"))
 calc_quants_ir(sim, "psrr", round = 4)
 calc_quants_ir(sim, "psrro", round = 4)
 
 
-# Comparative -------------------------------------------------------------
+ag <- reallocate_pcp(c(0.089, 0.127, 0.784), -0.184+0)
+hr <- c(0.69, 0.19, 0.01)
 
-# par(mar = c(3,3,1,1), mgp = c(2,1,0))
-# all <- gather_netsim(fn)
-#
-# plot_netsim_list(all, var = "i.prev", ylim = c(0, 0.25))
-#
-# plot_netsim_list(all, var = "cc.HIV.mr", ylim = c(0, 0.1))
-#
-# plot_netsim_list(all, var = "dep.AIDS", ylim = c(0, 2))
-#
-# plot_netsim_list(all, var = "new.aids.full", ylim = c(0, 1))
-#
-# plot_netsim_list(all, var = "cc.vsupp", ylim = c(0, 1))
-# plot_netsim_list(all, var = "cc.vsupp.dur1y", ylim = c(0, 1))
-#
-# plot_netsim_list(all, var = "mean.tx.on", ylim = c(0, 1000))
-# plot_netsim_list(all, var = "mean.tx.off", ylim = c(0, 300))
+ag[1]*hr[1] + ag[2]*hr[2] + ag[3]*hr[3]
+
+ag <- c(0.211, 0.07, 0.1, 0.619)
+hr <- c(1, 1-0.31, 1-0.81, 1-0.95)
+
+ag[1]*hr[1] + ag[2]*hr[2] + ag[3]*hr[3] + ag[4]*hr[4]

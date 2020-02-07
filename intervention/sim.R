@@ -22,7 +22,7 @@ param <- param_msm(netstats = netstats,
                    prep.discont.rate = 1 - (2^(-1/(224.4/7))),
                    prep.require.lnt = TRUE,
                    prep.risk.reassess.method = "year",
-                   prep.optim.start = (52*65) + 1,
+                   prep.optim.start =  (52*65) + 1,
                    prep.optim.init.prob = POIP,
                    prep.start.prob.optim = PSPO,
                    prep.optim.adhr.cap = POAC,
@@ -44,7 +44,8 @@ sim <- netsim(burnin, param, init, control)
 
 # Merging
 savesim(sim, save.min = TRUE, save.max = FALSE)
-vars <- c("ir100", "incid", "num", "prepCurr", "prepElig",
+vars <- c("ir100", "incid", "num", "i.prev", "i.prev.dx",
+          "prepCurr", "prepElig",
           "OptimInitStarts", "OptimInitPrev",
           "PrEPStarts", "PrEPStartsOptim",
           "OptimAdhrStarts", "OptimAdhrPrev", "PrEPHighAdr",
@@ -52,3 +53,4 @@ vars <- c("ir100", "incid", "num", "prepCurr", "prepElig",
           "PrEPStopsInd", "PrEPStopsRand", "PrEPStopsRandOptim")
 process_simfiles(simno = simno, min.n = njobs, nsims = nsims,
                  truncate.at = 52*60, vars = vars)
+
