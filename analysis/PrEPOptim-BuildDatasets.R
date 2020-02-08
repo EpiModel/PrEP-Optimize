@@ -8,7 +8,7 @@ library("foreach")
 
 # Reference Scenario ------------------------------------------------------
 
-load("intervention/data/sim.n500.rda")
+load("data/sim.n500.rda")
 
 sim <- truncate_sim(sim, at = 261)
 df <- as.data.frame(sim, out = "mean")
@@ -46,7 +46,7 @@ dfr$PADO <- sim$param$prep.adhr.dist.optim[3]
 dfr$PORC <- sim$param$prep.optim.retn.cap
 dfr$PDRO <- sim$param$prep.discont.rate.optim
 dfr$infAvert <- NA
-dfr$scenario <- 500
+dfr$scenario <- "n500"
 dfr <- select(dfr, scenario, everything())
 
 # dfr_tot <- data.frame(scenario = dfr$scenario[1],
@@ -77,8 +77,8 @@ dfr <- select(dfr, scenario, everything())
 
 # Counterfactual Scenarios ------------------------------------------------
 
-fn <- list.files("intervention/data/", pattern = "sim", full.names = TRUE)
-fn <- fn[8]
+fn <- list.files("data/", pattern = "sim", full.names = TRUE)
+fn <- fn[1]
 
 load(fn)
 plot(sim, y = c("OptimAdhrStarts", "OptimRetnStarts"))
@@ -118,6 +118,8 @@ counter_df_byyear <- function(fn, dfr) {
 }
 counter_df_byyear(fn, dfr)
 
+strsplit(fn[1], "[.]")[[1]][2]
+
 # counter_df_overall <- function(fn, dfr.tot) {
 #   load(fn)
 #   df <- as.data.frame(sim, out = "mean")
@@ -141,6 +143,7 @@ counter_df_byyear(fn, dfr)
 
 library("EpiModelHIV")
 library("dplyr")
+library("doParallel")
 library("foreach")
 
 load("data/sim.n500.rda")
@@ -181,20 +184,19 @@ dfr$PADO <- sim$param$prep.adhr.dist.optim[3]
 dfr$PORC <- sim$param$prep.optim.retn.cap
 dfr$PDRO <- sim$param$prep.discont.rate.optim
 dfr$infAvert <- NA
-dfr$scenario <- 500
+dfr$scenario <- "n500"
 dfr <- select(dfr, scenario, everything())
 dfr
 
 fn <- list.files("data/", pattern = "sim.n1[0-4][0-9][0-9].rda", full.names = TRUE)
-
+fn <- list.files("data/", pattern = "sim.n1[5-9][0-9][0-9].rda", full.names = TRUE)
 
 # create yearly dataset
-
-doParallel::registerDoParallel(parallel::detectCores())
-doParallel::registerDoParallel(32)
+registerDoParallel(detectCores())
 tdf <- foreach(i = 1:length(fn)) %dopar% {
   counter_df_byyear(fn[i], dfr)
 }
+stopImplicitCluster()
 
 for (i in 1:length(fn)) {
   df <- counter_df_byyear(fn[i], dfr)
@@ -206,17 +208,18 @@ for (i in 1:length(fn)) {
   cat("\n File ", fn[i], " complete ...")
 }
 
-
 tdf <- do.call("rbind", tdf)
 dim(tdf)
-head(tdf)
+head(tdf, 30)
 
 all <- rbind(dfr, tdf)
 head(all, 30)
 
 all$PinfAvert <- all$infAvert/all$incid
+hist(all$PinfAvert)
 
-saveRDS(all, file = "data/prepOptim-Yearly-v1.rds", compress = "xz")
+saveRDS(all, file = "data/prepOptim-Yearly-v2-500per.rds", compress = "xz")
+saveRDS(all, file = "data/prepOptim-Yearly-v2-100per.rds", compress = "xz")
 
 
 # # create overall dataset
