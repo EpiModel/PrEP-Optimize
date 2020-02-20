@@ -49,31 +49,6 @@ dfr$infAvert <- NA
 dfr$scenario <- "n500"
 dfr <- select(dfr, scenario, everything())
 
-# dfr_tot <- data.frame(scenario = dfr$scenario[1],
-#                       incid = sum(dfr$incid),
-#                       prepCurr = mean(dfr$prepCurr),
-#                       OptimInitStarts = sum(dfr$OptimInitStarts),
-#                       OptimInitPrev = mean(dfr$OptimInitPrev),
-#                       PrEPStarts = sum(dfr$PrEPStarts),
-#                       PrEPStartsOptim = sum(dfr$PrEPStartsOptim),
-#                       OptimAdhrStarts = sum(dfr$OptimAdhrStarts),
-#                       OptimAdhrPrev = mean(dfr$OptimAdhrPrev),
-#                       PrEPHighAdr = mean(dfr$PrEPHighAdr),
-#                       OptimRetnStarts = sum(dfr$OptimRetnStarts),
-#                       OptimRetnPrev = mean(dfr$OptimRetnPrev),
-#                       PrEPStopsInd = sum(dfr$PrEPStopsInd),
-#                       PrEPStopsRand = sum(dfr$PrEPStopsRand),
-#                       PrEPStopsRandOptim = sum(dfr$PrEPStopsRandOptim),
-#                       POIP = dfr$POIP[1],
-#                       PSPO = dfr$PSPO[1],
-#                       POAC = dfr$POAC[1],
-#                       PADO = dfr$PADO[1],
-#                       PORC = dfr$PORC[1],
-#                       PDRO = dfr$PDRO[1],
-#                       infAvert = NA)
-# dfr_tot
-
-
 
 # Counterfactual Scenarios ------------------------------------------------
 
@@ -119,23 +94,6 @@ counter_df_byyear <- function(fn, dfr) {
 counter_df_byyear(fn, dfr)
 
 strsplit(fn[1], "[.]")[[1]][2]
-
-# counter_df_overall <- function(fn, dfr.tot) {
-#   load(fn)
-#   df <- as.data.frame(sim, out = "mean")
-#   dfc <- select(df, incid, s.num, ir100, prepCurr, prepCurr.hadr, prep.rand.stop)
-#   dfc <- dfc[-1, ]
-#   df2 <- data.frame(incid = sum(dfc$incid), s.num = sum(dfc$s.num)/52,
-#                     prepCurr = sum(dfc$prepCurr)/52, prepCurrHA = sum(dfc$prepCurr.hadr)/52,
-#                     prepRandSt = sum(dfc$prep.rand.stop))
-#   df2$PSP <- sim$param$prep.start.prob
-#   df2$PHA <- sim$param$prep.adhr.dist[3]
-#   df2$PDR <- sim$param$prep.discont.rate
-#   df2$infAvert <- dfr.tot$incid - df2$incid
-#   df2$scenario <- strsplit(fn, "[.]")[[1]][2]
-#   return(df2)
-# }
-# counter_df_overall(fn, dfr.tot)
 
 
 
@@ -221,22 +179,3 @@ hist(all$PinfAvert)
 saveRDS(all, file = "data/prepOptim-Yearly-v2-500per.rds", compress = "xz")
 saveRDS(all, file = "data/prepOptim-Yearly-v2-100per.rds", compress = "xz")
 
-
-# # create overall dataset
-#
-# doParallel::registerDoParallel(parallel::detectCores())
-# tdf <- foreach(i = 1:length(fn)) %dopar% {
-#   counter_df_overall(fn[i], dfr.tot)
-# }
-#
-# tdf <- do.call("rbind", tdf)
-# dim(tdf)
-# tdf <- select(tdf, scenario, PSP, PHA, PDR, everything())
-# head(tdf)
-#
-# all <- rbind(dfr.tot, tdf)
-# head(all, 30)
-#
-# all$PinfAvert <- all$infAvert/all$incid
-#
-# saveRDS(all, file = "data/hold/prepOptim-Overall-v1.rda", compress = "xz")
