@@ -14,10 +14,10 @@ vars <- list(POIP = 0,
 # vars <- NULL
 sbatch_master(vars = vars,
               working.dir = "intervention/",
-              master.file = "master.ref.sh",
+              master.file = "master.sh",
               simno.start = 500,
               ckpt = TRUE,
-              nsims = 500,
+              nsims = 112,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")
@@ -28,19 +28,20 @@ sbatch_master(vars = vars,
 # Ranges
 # POIP: 0-0.50
 # PSPO: 0.07
-# POAC: 0-10000
+# POAC: 0-70
 # PADO: 0.399
-# PORC: 0-10000
+# PORC: 0-3200
 # PDRO: 1.54
 
 library("lhs")
 
-set.seed(12345)
-l <- randomLHS(1000, 3)
+set.seed(234567)
+total.set.size <- 5000
+l <- randomLHS(total.set.size, 3)
 
 POIP <- c(0, 0.50)
-POAC <- c(0, 10000)
-PORC <- c(0, 10000)
+POAC <- c(0, 70)
+PORC <- c(0, 3200)
 
 POIPs <- round((l[, 1]*(POIP[2]-POIP[1]))+POIP[1], 4)
 POACs <- floor((l[, 2]*(POAC[2]-POAC[1]))+POAC[1])
@@ -54,31 +55,20 @@ vars <- list(POIP = POIPs,
              PDRO = 1.54)
 vars <- as.data.frame(vars)
 head(as.data.frame(vars))
+str(vars)
+
+set.size <- 250
+nsets <- total.set.size/set.size
 
 sbatch_master(vars = vars,
               expand.vars = FALSE,
               working.dir = "intervention/",
               master.file = "master.lhs.sh",
               runsim.file = "runsim.sh",
-              param.file = "params.lhs.csv",
               simno.start = 1000,
-              append = FALSE,
+              append = TRUE,
               ckpt = TRUE,
-              nsims = 500,
-              ncores = 28,
-              walltime = "00:30:00",
-              mem = "100G")
-
-sbatch_master(vars = vars[500:1000, ],
-              expand.vars = FALSE,
-              working.dir = "intervention/",
-              master.file = "master.lhs2.sh",
-              runsim.file = "runsim.sh",
-              # param.file = "params.lhs.csv",
-              simno.start = 1500,
-              append = FALSE,
-              ckpt = FALSE,
-              nsims = 100,
+              nsims = 112,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")

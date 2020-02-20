@@ -4,11 +4,25 @@
 library("EpiModelHIV")
 library("tidyverse")
 
-do <- readRDS("analysis/data/prepOptim-Overall-v1.rda")
-dy <- readRDS("analysis/data/prepOptim-Yearly-v1.rda")
+dy <- readRDS("analysis/data/prepOptim-Yearly-v2-500per.rds")
 
 head(do, 30)
 head(dy, 30)
+
+# Descriptive stats
+
+summary(dy$POAC)
+summary(dy$OptimAdhrStarts)/52
+# New range for POAC = 0:70
+
+summary(dy$PORC)
+summary(dy$OptimRetnPrev)
+# New range for PORC = 0:3200
+
+summary(dy$POIP)
+summary(dy$prepCurr)
+
+plot(dy$POIP, dy$prepCurr)
 
 mod1 <- lm(PinfAvert ~ PSP, data = do)
 summary(mod1)
