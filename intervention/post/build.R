@@ -1,25 +1,26 @@
 
-## PrEP-Optim Analysis
+## PrEP-Optim Analysis: Build Datasets
 
-library("EpiModelHIV")
-library("dplyr")
-library("doParallel")
-library("foreach")
+library("methods")
+suppressMessages(library("EpiModelHIV"))
+suppressMessages(library("dplyr"))
+suppressMessages(library("doParallel"))
+suppressMessages(library("foreach"))
 
 load("data/sim.n500.rda")
 
 sim <- truncate_sim(sim, at = 261)
 df <- as.data.frame(sim, out = "mean")
 df <- df[-nrow(df), ]
-dim(df)
-head(df)
-tail(df)
+# dim(df)
+# head(df)
+# tail(df)
 dfr <- df
-head(dfr)
+# head(dfr)
 
 years <- rep(1:10, each = 52)
 dfr$years <- years
-head(dfr)
+# head(dfr)
 
 dfr <- group_by(dfr, years) %>%
   summarise(incid = sum(incid),
@@ -49,7 +50,7 @@ dfr$scenario <- "n500"
 dfr <- select(dfr, scenario, everything())
 dfr
 
-fn <- list.files("data/", pattern = "sim.n1[5-9][0-9][0-9].rda", full.names = TRUE)
+fn <- list.files("data/", pattern = "sim.n1[0-9][0-9][0-9].rda", full.names = TRUE)
 
 # create yearly dataset
 counter_df_byyear <- function(fn, dfr) {
@@ -84,10 +85,10 @@ counter_df_byyear <- function(fn, dfr) {
   df2$infAvert <- dfr$incid - df2$incid
   df2$scenario <- strsplit(fn, "[.]")[[1]][2]
   df2 <- select(df2, scenario, everything())
-  cat(" \t ", fn)
+  # cat(" \t ", fn)
   return(df2)
 }
-counter_df_byyear(fn[1], dfr)
+# counter_df_byyear(fn[1], dfr)
 
 registerDoParallel(detectCores())
 tdf <- foreach(i = 1:length(fn)) %dopar% {
@@ -95,26 +96,25 @@ tdf <- foreach(i = 1:length(fn)) %dopar% {
 }
 stopImplicitCluster()
 
-for (i in 1:100) {
-  df <- counter_df_byyear(fn[i], dfr)
-  if (i == 1) {
-    tdf <- df
-  } else {
-    tdf <- rbind(tdf, df)
-  }
-  cat("\n File ", fn[i], " complete ...")
-}
+# for (i in 1:100) {
+#   df <- counter_df_byyear(fn[i], dfr)
+#   if (i == 1) {
+#     tdf <- df
+#   } else {
+#     tdf <- rbind(tdf, df)
+#   }
+#   cat("\n File ", fn[i], " complete ...")
+# }
 
 tdf <- do.call("rbind", tdf)
-dim(tdf)
-head(tdf, 30)
+# dim(tdf)
+# head(tdf, 30)
 
 all <- rbind(dfr, tdf)
-head(all, 30)
+# head(all, 30)
 
 all$PinfAvert <- all$infAvert/all$incid
 all$pCov <- all$prepCurr/all$prepElig
-hist(all$PinfAvert)
+# hist(all$PinfAvert)
 
-saveRDS(all, file = "data/prepOptim-Yearly-v2-100per.rds", compress = "xz")
-
+saveRDS(all, file = "data/prepOptim-Yearly-v3-1000sets-100per.rds", compress = "xz")
