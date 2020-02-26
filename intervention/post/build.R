@@ -50,7 +50,7 @@ dfr$scenario <- "n500"
 dfr <- select(dfr, scenario, everything())
 dfr
 
-fn <- list.files("data/", pattern = "sim.n1[0-9][0-9][0-9].rda", full.names = TRUE)
+fn <- list.files("data/", pattern = "sim.n[1-5][0-9][0-9][0-9].rda", full.names = TRUE)
 
 # create yearly dataset
 counter_df_byyear <- function(fn, dfr) {
@@ -88,7 +88,7 @@ counter_df_byyear <- function(fn, dfr) {
   # cat(" \t ", fn)
   return(df2)
 }
-# counter_df_byyear(fn[1], dfr)
+counter_df_byyear(fn[1], dfr)
 
 registerDoParallel(detectCores())
 tdf <- foreach(i = 1:length(fn)) %dopar% {
@@ -96,25 +96,14 @@ tdf <- foreach(i = 1:length(fn)) %dopar% {
 }
 stopImplicitCluster()
 
-# for (i in 1:100) {
-#   df <- counter_df_byyear(fn[i], dfr)
-#   if (i == 1) {
-#     tdf <- df
-#   } else {
-#     tdf <- rbind(tdf, df)
-#   }
-#   cat("\n File ", fn[i], " complete ...")
-# }
-
 tdf <- do.call("rbind", tdf)
-# dim(tdf)
-# head(tdf, 30)
+dim(tdf)
+head(tdf, 30)
 
 all <- rbind(dfr, tdf)
-# head(all, 30)
+head(all, 30)
 
 all$PinfAvert <- all$infAvert/all$incid
 all$pCov <- all$prepCurr/all$prepElig
-# hist(all$PinfAvert)
 
-saveRDS(all, file = "data/prepOptim-Yearly-v3-1000sets-100per.rds", compress = "xz")
+saveRDS(all, file = "data/prepOptim-Yearly-v3-5000sets-100per.rds", compress = "xz")

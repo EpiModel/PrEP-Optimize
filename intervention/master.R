@@ -57,16 +57,15 @@ vars <- as.data.frame(vars)
 head(as.data.frame(vars))
 str(vars)
 
-set.size <- 250
-nsets <- total.set.size/set.size
+simno <- 5500:5999
 
-sbatch_master(vars = vars,
+sbatch_master(vars = vars[simno - 999, ],
               expand.vars = FALSE,
               working.dir = "intervention/",
-              master.file = "master.lhs.sh",
+              master.file = "master.lhs.curr.sh",
               runsim.file = "runsim.sh",
-              simno.start = 1000,
-              append = TRUE,
+              simno.start = min(simno),
+              append = FALSE,
               ckpt = TRUE,
               nsims = 112,
               ncores = 28,
