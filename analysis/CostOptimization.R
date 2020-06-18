@@ -2,10 +2,11 @@
 library(dplyr)
 library(psych)
 library(ggplot2)
+library(mgcv)
 
 ### Load data
 #df_prep <- readRDS("prepOptim-Yearly-v2-500per.rds")
-df_prep <- readRDS("prepOptim-Yearly-v3-5000sets-100per.rds")
+df_prep <- readRDS("analysis/data/prepOptim-Yearly-v3-5000sets-100per.rds")
 
 ### Cost parameters
 
@@ -15,15 +16,15 @@ cost.optim.init <- 100*100 # **placeholder value**
 
 # ADHERENCE
 # cost per PrEP initiant receiving adherence intervention (assume capacity constraint)
-# Question: should cost be incured for full capacity (prep.optim.adhere.cap -> POAC in data frame)? 
+# Question: should cost be incured for full capacity (prep.optim.adhere.cap -> POAC in data frame)?
 #           Or only used capacity (OptimAdhrStarts)? **Thinking capacity**
 cost.optim.adhr <- 250 # **placeholder value**
 
 # RETENTION
 # Cost per PrEP user enrolled in retention program (e.g. PrEP @ Home) each time step
-# Question: should cost be incured for full capacity (prep.optim.retn.cap -> PORC in data frame)? 
+# Question: should cost be incured for full capacity (prep.optim.retn.cap -> PORC in data frame)?
 #           Or only used capacity (OptimRetnPrev)? **Thinking capacity**
-# Annual cost of XXX --> weekly cost of XXX/52 for each time step 
+# Annual cost of XXX --> weekly cost of XXX/52 for each time step
 cost.optim.retn <- 2000 # **placeholder value**
 
 
@@ -42,7 +43,7 @@ cost.optim.retn <- 2000 # **placeholder value**
 # parameters
 #   prep.optim.adhere.cap: maximum capacity for adherence intervention
 # outputs
-#   OptimAdhrStarts: Incidence of new adherence intervention users per time step. 
+#   OptimAdhrStarts: Incidence of new adherence intervention users per time step.
 #   OptimAdhrPrev: Number current on adherence intervention at time step.
 
 # RETENTION
@@ -74,8 +75,9 @@ df_prep$OptimRetnExpenditure <- df_prep$OptimRetnPrev * cost.optim.retn
 df_prep$TotalBudget <- df_prep$OptimInitBudget + df_prep$OptimAdhrBudget + df_prep$OptimRetnBudget
 df_prep$TotalExpenditure <- df_prep$OptimInitExpenditure + df_prep$OptimAdhrExpenditure + df_prep$OptimRetnExpenditure
 
+# Need to check on why certain things are summed
 ### Calculate 10-year outcomes
-df_prep_10yr <- full_join(df_prep %>% group_by(scenario) %>% 
+df_prep_10yr <- full_join(df_prep %>% group_by(scenario) %>%
                             summarise_at(vars(incid,prepElig,prepCurr,infAvert),
                                          sum),
                           df_prep %>% group_by(scenario) %>%
@@ -90,7 +92,7 @@ df_prep_10yr <- full_join(df_prep_10yr,
                           by="scenario")
 
 df_prep_10yr <- full_join(df_prep_10yr,
-                          df_prep %>% group_by(scenario) %>% 
+                          df_prep %>% group_by(scenario) %>%
                             summarise_at(vars(POAC_yr,PORC,
                                               OptimInitStarts, OptimAdhrStarts, OptimRetnPrev,
                                               OptimInitExpenditure,OptimAdhrExpenditure,OptimRetnExpenditure,TotalExpenditure,
@@ -131,6 +133,36 @@ L2$coefficients["(Intercept)"]/10 # base max. capacity per year
 
 L3 <- lm(data=df_prep_10yr,formula=infAvert~POIP+POAC_yr+PORC+POIP*POAC_yr+POIP*PORC)
 
+# gam <- gam(data = df_prep_10yr, formula = infAvert ~ s(POIP) + s(POAC_yr) + s(PORC) + ti(POIP, POAC_yr, PORC))
+# gam <- gam(data = df_prep_10yr, formula = infAvert ~ ti(POIP) + ti(POAC_yr) + ti(PORC) + ti(POIP, PORC, POAC_yr))
+#
+# gam <- gam(data = df_prep_10yr, formula = infAvert ~ ti(POIP) + ti(POAC_yr) + ti(PORC) + ti(POIP, PORC))
+# gam <- gam(data = df_prep_10yr, formula = infAvert ~ s(POIP) + s(POAC_yr) + s(PORC) + ti(POIP, PORC) + ti(POIP, POAC_yr) + ti(POAC_yr, PORC))
+#
+# gam <- gam(data = df_prep_10yr, formula = infAvert ~ ti(POIP) + ti(POAC_yr) + ti(PORC) + ti(POIP, PORC) + ti(POIP, POAC_yr))
+#
+#
+# gam <- gam(data = df_prep_10yr, formula = infAvert ~ ti(POIP) + ti(POAC_yr) + ti(PORC) + ti(POIP, PORC) + ti(POIP, POAC_yr) + ti(POAC_yr, PORC))
+
+gam <- gam(data = df_prep_10yr,
+           formula = infAvert ~ ti(POIP) + ti(POAC_yr) + ti(PORC) + ti(POIP, PORC) + ti(POIP, POAC_yr) + ti(POAC_yr, PORC),
+           family = Gamma(link = "identity"))
+
+summary(gam)
+plot(gam)
+gam$coefficients
+gam$model
+
+predict(gam, newdata = data.frame(POIP = .01, POAC_yr = 1000, PORC = 1000))
+predict(gam, newdata = data.frame(POIP = 0, POAC_yr = 0, PORC = 0))
+
+
+gam(formula,family=gaussian(),data=list(),weights=NULL,subset=NULL,
+    na.action,offset=NULL,method="GCV.Cp",
+    optimizer=c("outer","newton"),control=list(),scale=0,
+    select=FALSE,knots=NULL,sp=NULL,min.sp=NULL,H=NULL,gamma=1,
+    fit=TRUE,paraPen=NULL,G=NULL,in.out,drop.unused.levels=TRUE,
+    drop.intercept=NULL,discrete=FALSE,...)
 
 i_plot <- which(df_prep_10yr$POIP>=0 & df_prep_10yr$POIP<=0.05)
 plot(df_prep_10yr$PORC[i_plot],df_prep_10yr$infAvert[i_plot])
