@@ -130,6 +130,7 @@ for (i in 1:n) {
   res$budget[i] <- budget[i]
 }
 
+# discard optimizations that did not converge
 res_plot <- res %>% filter(converge == 0)
 
 # plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
