@@ -130,9 +130,68 @@ obj_fun <- function(x) {
 # adj.a <- 1
 # adj.r <- 1
 
-adj.i <- 10
-adj.a <- .75
-adj.r <- 1.5
+outlist <- list()
+adj.grid <- expand.grid(adj.i = seq(from = 7, to = 13, by = 1),
+                        adj.a = seq(from = .25, to = 1.25, by = .25),
+                        adj.r = seq(from = 1, to = 2, by = .25))
+# for (j in 1:2) {
+for (j in 1:nrow(adj.grid)) {
+  adj.i <- adj.grid$adj.i[j]
+  adj.a <- adj.grid$adj.a[j]
+  adj.r <- adj.grid$adj.r[j]
+
+  cost.i <- adj.i * (80 * 790 * 100)
+  cost.a <- adj.a * (511.38 * 10)
+  cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+
+  budget_constraint <- function(x) {
+    # x[1] - init, x[2] - adhr, x[3] - retn
+    cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
+  }
+
+  # number of different budget constraint values to consider
+  n = 100
+
+  # initialize optimization results data.frame
+  res <- data.frame(poip = rep(NA, n),
+                    poac = rep(NA, n),
+                    porc = rep(NA, n),
+                    infAvert = rep(NA, n),
+                    budget = rep(NA, n),
+                    converge = rep(NA, n))
+
+  # specify lower and upper bounds for sequence of budgets to consider
+  budget <- seq(from = 5e5, to = 9e6, length.out = n)
+
+  for (i in 1:n) {
+    solnp <- solnp(c(.01, 100, 100),
+                   obj_fun, #function to optimise
+                   eqfun=budget_constraint, #equality function
+                   eqB=budget[i],   #the equality constraint
+                   LB=c(0,0,0), #lower bound for parameters i.e. greater than zero
+                   UB=c(0.10, 2000, 2000),
+                   control = list(inner.iter = 800)) #upper bound for parameters
+    # solnp <- solnp(c(.01, 100, 100),
+    #                obj_fun, #function to optimise
+    #                eqfun=budget_constraint, #equality function
+    #                eqB=budget[i],   #the equality constraint
+    #                LB=c(0,0,0), #lower bound for parameters i.e. greater than zero
+    #                UB=c(0.05, 3588, 3199)) #upper bound for parameters
+    pars <- solnp$pars
+    res$poip[i] <- pars[1]
+    res$poac[i] <- pars[2]
+    res$porc[i] <- pars[3]
+    res$infAvert[i] <- - last(solnp$values)
+    res$converge[i] <- solnp$convergence
+    res$budget[i] <- budget[i]
+  }
+  outlist[[j]] <- res
+}
+save(outlist, file = "adj_grid_outlist.rda")
+#
+# adj.i <- 10
+# adj.a <- .75
+# adj.r <- 1.5
 
 cost.i <- adj.i * (80 * 790 * 100)
 cost.a <- adj.a * (511.38 * 10)
