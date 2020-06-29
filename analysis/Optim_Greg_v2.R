@@ -70,19 +70,48 @@ ggplot(df_prep_vis, aes(x = POIP, y = pCov)) + geom_point()
 df_prep_10yr <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 2000, POAC_yr < 2000)
 
 # GAM specification
-# k <- 4
+k <- 4
 # gam <- gam(data = df_prep_10yr,
-#            formula = infAvert ~ ti(POIP, k = k) + ti(POAC_yr, k = k) + ti(PORC, k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k) + ti(POAC_yr, PORC, k = k),
-#            family = Gamma(link = "identity"))
-
+#            formula = infAvert ~ s(POIP, k = k) + s(POAC_yr, k = k) + s(PORC, k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+#            family = Gamma(link = "inverse"))
+gam <- gam(data = df_prep_10yr,
+           formula = infAvert ~ s(POIP, k = k) + s(POAC_yr, k = k) + s(PORC, k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+           family = Gamma(link = "log"))
+# coef(gam)
+# gam
+# plot(gam)
 # SCAM (Shape Constrained Additive Model) specification
 # bs = "cv" forces spline objective function to be concave
 # this smoothness/shape constraint helps the optimization functions
 k <- 4
-scam <- scam(data = df_prep_10yr,
+scam1 <- scam(data = df_prep_10yr,
              formula = infAvert ~ s(POIP, bs = "cv", k = k) + s(POAC_yr, bs = "cv", k = k) + s(PORC, bs = "cv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
              family = Gamma(link = "identity"))
+# scam <- scam(data = df_prep_10yr,
+#              formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+#              family = Gamma(link = "log"))
+#
+# scam <- scam(data = df_prep_10yr,
+#               formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+#               family = Gamma(link = "log"))
+scam <- scam(data = df_prep_10yr,
+             formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k) +  ti(POAC_yr, PORC, k = k),
+             family = Gamma(link = "log"))
 
+# plot(scam)
+
+
+scam2 <- scam(data = df_prep_10yr,
+              formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k),
+              family = Gamma(link = "log"))
+
+# scam3 <- scam(data = df_prep_10yr,
+#              formula = infAvert ~ s(POIP, bs = "cv", k = k) + s(POAC_yr, bs = "cv", k = k) + s(PORC, bs = "cv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+#              family = Gamma(link = "inverse"), start = coef(gam))
+# scam3 <- scam(data = df_prep_10yr,
+#               formula = infAvert ~ s(POIP, bs = "cx", k = k) + s(POAC_yr, bs = "cx", k = k) + s(PORC, bs = "cx", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+#               family = Gamma(link = "inverse"))
+# plot(scam2)
 # p <- 5
 # glm <- glm(data = df_prep_10yr,
 #            formula = infAvert ~ poly(POIP, p) + poly(POAC_yr, p) + poly(PORC, p) + poly(POIP*PORC, p) + poly(POIP*POAC_yr, p) + poly(POAC_yr*PORC, p),
@@ -102,14 +131,14 @@ scam <- scam(data = df_prep_10yr,
 # plot(residuals(gam))
 # gam.check(gam)
 
-predict(scam, newdata = data.frame(POIP = .01, POAC_yr = 1000, PORC = 1000))
+exp(predict(scam, newdata = data.frame(POIP = .01, POAC_yr = 1000, PORC = 1000)))
 predict(scam, newdata = data.frame(POIP = 0, POAC_yr = 0, PORC = 0))
 
 # Objective function: InfAvert~capacity parameters
 # Predict from fitted model
 # Optimization function seeks to minimize the objective function, so objective function will return the negative of the object function.
 obj_fun <- function(x) {
-  - predict(scam, newdata = data.frame(POIP = x[1], POAC_yr = x[2], PORC = x[3]))
+  - exp(predict(scam, newdata = data.frame(POIP = x[1], POAC_yr = x[2], PORC = x[3])))
 }
 
 # # test objective function
@@ -131,11 +160,12 @@ obj_fun <- function(x) {
 # adj.r <- 1
 
 outlist <- list()
-adj.grid <- expand.grid(adj.i = seq(from = 7, to = 13, by = 1),
-                        adj.a = seq(from = .25, to = 1.25, by = .25),
-                        adj.r = seq(from = 1, to = 2, by = .25))
+adj.grid <- expand.grid(adj.i = seq(from = 7, to = 13, by = 1.5),
+                        adj.a = seq(from = .25, to = 1, by = .25),
+                        adj.r = seq(from = 1, to = 2, by = .5))
 # for (j in 1:2) {
 for (j in 1:nrow(adj.grid)) {
+  print(j)
   adj.i <- adj.grid$adj.i[j]
   adj.a <- adj.grid$adj.a[j]
   adj.r <- adj.grid$adj.r[j]
@@ -150,7 +180,7 @@ for (j in 1:nrow(adj.grid)) {
   }
 
   # number of different budget constraint values to consider
-  n = 100
+  n = 3
 
   # initialize optimization results data.frame
   res <- data.frame(poip = rep(NA, n),
@@ -161,7 +191,7 @@ for (j in 1:nrow(adj.grid)) {
                     converge = rep(NA, n))
 
   # specify lower and upper bounds for sequence of budgets to consider
-  budget <- seq(from = 5e5, to = 9e6, length.out = n)
+  budget <- seq(from = 1e6, to = 9e6, length.out = n)
 
   for (i in 1:n) {
     solnp <- solnp(c(.01, 100, 100),
@@ -170,7 +200,7 @@ for (j in 1:nrow(adj.grid)) {
                    eqB=budget[i],   #the equality constraint
                    LB=c(0,0,0), #lower bound for parameters i.e. greater than zero
                    UB=c(0.10, 2000, 2000),
-                   control = list(inner.iter = 800)) #upper bound for parameters
+                   control = list(inner.iter = 16000)) #upper bound for parameters
     # solnp <- solnp(c(.01, 100, 100),
     #                obj_fun, #function to optimise
     #                eqfun=budget_constraint, #equality function
@@ -187,11 +217,11 @@ for (j in 1:nrow(adj.grid)) {
   }
   outlist[[j]] <- res
 }
-save(outlist, file = "adj_grid_outlist.rda")
+save(outlist, file = "adj_grid_outlist_loglink.rda")
 #
-# adj.i <- 10
-# adj.a <- .75
-# adj.r <- 1.5
+adj.i <- 10
+adj.a <- .75
+adj.r <- 1.5
 
 cost.i <- adj.i * (80 * 790 * 100)
 cost.a <- adj.a * (511.38 * 10)
@@ -271,6 +301,7 @@ for (i in 1:n) {
 # discard optimizations that did not converge
 res_plot <- res %>% filter(converge == 0)
 
+res_plot <- outlist[[95]]
 # plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
 ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
 ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
@@ -288,12 +319,18 @@ ggplot(data = res_plot, aes(x = budget, y = porc * cost.r / budget)) +
   geom_line() +
   ylab("Proportion of Budget in Retention")
 
+scam <- scam(data = df_prep_10yr,
+             formula = infAvert ~ s(POIP, bs = "micv", k = 6) + s(POAC_yr, bs = "micv", k = 6) + s(PORC, bs = "micv", k = 6) + ti(POIP, PORC, k = 3) + ti(POIP, POAC_yr, k = 3) +  ti(POAC_yr, PORC, k = 3),
+             family = Gamma(link = "log"))
+
+plot(scam)
+
 n = 101
 grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
                        POAC_yr = seq(0, 2000, length.out = n),
                        PORC = seq(0, 2000, length.out = n))
-pred <- predict(scam,
-                newdata = grid.df)
+pred <- exp(predict(scam,
+                newdata = grid.df))
 pred.df <- cbind(pred, grid.df)
 
 # ggplot(pred.df %>% filter(PORC == 0, POAC_yr == 0), aes(x = POIP, y = pred)) + geom_point() + ylim(0, 120)
