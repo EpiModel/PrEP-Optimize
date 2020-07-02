@@ -3,6 +3,7 @@
 ## MOX ##
 
 # Send
+scp renv.lock mox:/gscratch/csde/sjenness/poptim/
 scp est/*.rda mox:/gscratch/csde/sjenness/poptim/est
 scp intervention/sim.R intervention/runsim.sh intervention/master.* mox:/gscratch/csde/sjenness/poptim
 
