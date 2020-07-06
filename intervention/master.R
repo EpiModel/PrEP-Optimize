@@ -8,16 +8,16 @@ library("EpiModelHPC")
 vars <- list(POIP = 0,
              PSPO = 0.07,
              POAC = 0,
-             PADO = 0.39,
+             PADO = 0.399,
              PORC = 0,
-             PDRO = 10)
+             PDRO = 1.54)
 # vars <- NULL
 sbatch_master(vars = vars,
               working.dir = "intervention/",
-              master.file = "master.sh",
-              simno.start = 500,
-              ckpt = TRUE,
-              nsims = 112,
+              master.file = "master.base.sh",
+              simno.start = 0,
+              ckpt = FALSE,
+              nsims = 252,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")
@@ -112,7 +112,7 @@ str(vars)
 save(vars, file = "intervention/cfVars-5k.rda")
 load("intervention/cfVars-5k.rda")
 
-simno <- 1:199
+simno <- 800:1000
 
 sbatch_master(vars = vars[simno, ],
               expand.vars = FALSE,
