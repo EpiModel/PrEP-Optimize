@@ -8,16 +8,16 @@ library("EpiModelHPC")
 vars <- list(POIP = 0,
              PSPO = 0.07,
              POAC = 0,
-             PADO = 0.39,
+             PADO = 0.399,
              PORC = 0,
-             PDRO = 10)
+             PDRO = 1.54)
 # vars <- NULL
 sbatch_master(vars = vars,
               working.dir = "intervention/",
-              master.file = "master.sh",
-              simno.start = 500,
-              ckpt = TRUE,
-              nsims = 112,
+              master.file = "master.base.sh",
+              simno.start = 0,
+              ckpt = FALSE,
+              nsims = 252,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")
@@ -68,6 +68,61 @@ sbatch_master(vars = vars[simno - 999, ],
               append = FALSE,
               ckpt = TRUE,
               nsims = 112,
+              ncores = 28,
+              walltime = "00:30:00",
+              mem = "100G")
+
+
+# Counterfactual Scenario Revisions: June 2020 ----------------------------
+
+# Limited counterfactual ranges by on suggestion by GK
+
+# Ranges
+# POIP: 0-0.50
+# PSPO: 0.07
+# POAC: 0-70
+# PADO: 0.399
+# PORC: 0-3200
+# PDRO: 1.54
+
+library("lhs")
+
+set.seed(234567)
+total.set.size <- 5000
+l <- randomLHS(total.set.size, 3)
+
+POIP <- c(0, 0.10)
+POAC <- c(0, 40)
+PORC <- c(0, 2000)
+
+POIPs <- round((l[, 1]*(POIP[2]-POIP[1]))+POIP[1], 4)
+POACs <- floor((l[, 2]*(POAC[2]-POAC[1]))+POAC[1])
+PORCs <- floor((l[, 3]*(PORC[2]-PORC[1]))+PORC[1])
+
+vars <- list(POIP = POIPs,
+             PSPO = 0.07,
+             POAC = POACs,
+             PADO = 0.399,
+             PORC = PORCs,
+             PDRO = 1.54)
+vars <- as.data.frame(vars)
+head(as.data.frame(vars))
+str(vars)
+
+save(vars, file = "intervention/cfVars-5k.rda")
+load("intervention/cfVars-5k.rda")
+
+simno <- 800:1000
+
+sbatch_master(vars = vars[simno, ],
+              expand.vars = FALSE,
+              working.dir = "intervention/",
+              master.file = "master.lhs.curr.sh",
+              runsim.file = "runsim.sh",
+              simno.start = min(simno),
+              append = FALSE,
+              ckpt = FALSE,
+              nsims = 252,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")

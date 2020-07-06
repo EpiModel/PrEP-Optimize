@@ -7,7 +7,7 @@ suppressMessages(library("dplyr"))
 suppressMessages(library("doParallel"))
 suppressMessages(library("foreach"))
 
-load("data/sim.n500.rda")
+load("data/sim.n0000.rda")
 
 sim <- truncate_sim(sim, at = 261)
 df <- as.data.frame(sim, out = "mean")
@@ -46,11 +46,13 @@ dfr$PADO <- sim$param$prep.adhr.dist.optim[3]
 dfr$PORC <- sim$param$prep.optim.retn.cap
 dfr$PDRO <- sim$param$prep.discont.rate.optim
 dfr$infAvert <- NA
-dfr$scenario <- "n500"
+dfr$scenario <- "n0000"
 dfr <- select(dfr, scenario, everything())
 dfr
 
-fn <- list.files("data/", pattern = "sim.n[1-5][0-9][0-9][0-9].rda", full.names = TRUE)
+
+fn <- list.files("data/", pattern = "*.rda", full.names = TRUE)
+fn
 
 # create yearly dataset
 counter_df_byyear <- function(fn, dfr) {
@@ -90,7 +92,7 @@ counter_df_byyear <- function(fn, dfr) {
 }
 counter_df_byyear(fn[1], dfr)
 
-registerDoParallel(detectCores())
+registerDoParallel(detectCores()-1)
 tdf <- foreach(i = 1:length(fn)) %dopar% {
   counter_df_byyear(fn[i], dfr)
 }
@@ -106,4 +108,6 @@ head(all, 30)
 all$PinfAvert <- all$infAvert/all$incid
 all$pCov <- all$prepCurr/all$prepElig
 
-saveRDS(all, file = "data/prepOptim-Yearly-v3-5000sets-100per.rds", compress = "xz")
+saveRDS(all, file = "data/prepOptim-Yearly-v4-1000sets-250per.rds", compress = "xz")
+
+system("scp mox:/gscratch/csde/sjenness/poptim/data/*.rds analysis/data")
