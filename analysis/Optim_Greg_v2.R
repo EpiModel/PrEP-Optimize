@@ -9,7 +9,9 @@ library(Rsolnp)
 
 # import simulation output data
 setwd("C:/Users/Greg/Desktop/PrEP-Optimize")
-df_prep <- readRDS("analysis/data/prepOptim-Yearly-v3-5000sets-100per.rds")
+# df_prep <- readRDS("analysis/data/prepOptim-Yearly-v3-5000sets-100per.rds")
+df_prep <- readRDS("analysis/data/prepOptim-Yearly-v4-1000sets-250per.rds")
+
 # translate weekly adherence capacity into yearly capacity
 df_prep$POAC_yr <- df_prep$POAC*52
 
@@ -70,40 +72,46 @@ ggplot(df_prep_vis, aes(x = POIP, y = pCov)) + geom_point()
 df_prep_10yr <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 2000, POAC_yr < 2000)
 
 # GAM specification
-k <- 4
-# gam <- gam(data = df_prep_10yr,
-#            formula = infAvert ~ s(POIP, k = k) + s(POAC_yr, k = k) + s(PORC, k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
-#            family = Gamma(link = "inverse"))
+# k <- 7
+
 gam <- gam(data = df_prep_10yr,
-           formula = infAvert ~ s(POIP, k = k) + s(POAC_yr, k = k) + s(PORC, k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+           formula = infAvert ~ s(POIP, k = 4) + s(POAC_yr, k = 4) + s(PORC, k = 4) + ti(POIP, PORC, k = 4) + ti(POIP, POAC_yr, k = 4) + ti(PORC, POAC_yr, k = 4),
            family = Gamma(link = "log"))
+
+plot(gam, scheme = 1)
+plot(gam, scheme = 2)
+plot(gam, scheme = 3)
+vis.gam(gam, view = c("PORC", "POIP"))
+vis.gam(gam, view = c("PORC", "POIP"), plot.type = "contour")
+vis.gam(gam, view = c("POAC_yr", "POIP"))
+vis.gam(gam, view = c("POAC_yr", "POIP"), plot.type = "contour")
+vis.gam(gam, view = c("POAC_yr", "PORC"))
+vis.gam(gam, view = c("POAC_yr", "PORC"), plot.type = "contour")
+
 # coef(gam)
 # gam
 # plot(gam)
 # SCAM (Shape Constrained Additive Model) specification
 # bs = "cv" forces spline objective function to be concave
 # this smoothness/shape constraint helps the optimization functions
-k <- 4
-scam1 <- scam(data = df_prep_10yr,
-             formula = infAvert ~ s(POIP, bs = "cv", k = k) + s(POAC_yr, bs = "cv", k = k) + s(PORC, bs = "cv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
-             family = Gamma(link = "identity"))
+# k <- 4
+# scam1 <- scam(data = df_prep_10yr,
+#              formula = infAvert ~ s(POIP, bs = "cv", k = k) + s(POAC_yr, bs = "cv", k = k) + s(PORC, bs = "cv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+#              family = Gamma(link = "identity"))
+# # scam <- scam(data = df_prep_10yr,
+# #              formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+# #              family = Gamma(link = "log"))
+# #
+# # scam <- scam(data = df_prep_10yr,
+# #               formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+# #               family = Gamma(link = "log"))
 # scam <- scam(data = df_prep_10yr,
-#              formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+#              formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k) +  ti(POAC_yr, PORC, k = k),
 #              family = Gamma(link = "log"))
 #
-# scam <- scam(data = df_prep_10yr,
-#               formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
+# scam2 <- scam(data = df_prep_10yr,
+#               formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k),
 #               family = Gamma(link = "log"))
-scam <- scam(data = df_prep_10yr,
-             formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k) +  ti(POAC_yr, PORC, k = k),
-             family = Gamma(link = "log"))
-
-# plot(scam)
-
-
-scam2 <- scam(data = df_prep_10yr,
-              formula = infAvert ~ s(POIP, bs = "micv", k = k) + s(POAC_yr, bs = "micv", k = k) + s(PORC, bs = "micv", k = k),
-              family = Gamma(link = "log"))
 
 # scam3 <- scam(data = df_prep_10yr,
 #              formula = infAvert ~ s(POIP, bs = "cv", k = k) + s(POAC_yr, bs = "cv", k = k) + s(PORC, bs = "cv", k = k) + ti(POIP, PORC, k = k) + ti(POIP, POAC_yr, k = k),
@@ -117,52 +125,23 @@ scam2 <- scam(data = df_prep_10yr,
 #            formula = infAvert ~ poly(POIP, p) + poly(POAC_yr, p) + poly(PORC, p) + poly(POIP*PORC, p) + poly(POIP*POAC_yr, p) + poly(POAC_yr*PORC, p),
 #            family = Gamma(link = "identity"))
 
-# summary(scam)
-# vis.scam(scam, view = c("PORC", "POAC_yr"))
-# vis.scam(scam, view = c("POIP", "PORC"))
-# plot(scam)
-# plot(residuals(scam))
-# scam.check(scam)
 
-# summary(gam)
-# vis.gam(gam, view = c("PORC", "POAC_yr"))
-# vis.gam(gam, view = c("POIP", "PORC"))
-# plot(gam)
-# plot(residuals(gam))
-# gam.check(gam)
 
-exp(predict(scam, newdata = data.frame(POIP = .01, POAC_yr = 1000, PORC = 1000)))
-predict(scam, newdata = data.frame(POIP = 0, POAC_yr = 0, PORC = 0))
+exp(predict(gam, newdata = data.frame(POIP = .01, POAC_yr = 1000, PORC = 1000)))
+predict(gam, newdata = data.frame(POIP = 0, POAC_yr = 0, PORC = 0))
 
 # Objective function: InfAvert~capacity parameters
 # Predict from fitted model
 # Optimization function seeks to minimize the objective function, so objective function will return the negative of the object function.
 obj_fun <- function(x) {
-  - exp(predict(scam, newdata = data.frame(POIP = x[1], POAC_yr = x[2], PORC = x[3])))
+  - exp(predict(gam, newdata = data.frame(POIP = x[1], POAC_yr = x[2], PORC = x[3])))
 }
 
-# # test objective function
-# obj_fun(x = c(.25, 1000, 1000))
-#
-# # playing around with what values are needed to produce an interesting optimization result
-# adj.i <- 60
-# adj.a <- 1
-# adj.r <- 1
-#
-# budget_constraint <- function(x) {
-#   # x[1] - init, x[2] - adhr, x[3] - retn
-#   adj.i * (5815659 / .2239268) * x[1] + adj.a * (983*10) * x[2] + adj.r * (679.25*10) * x[3]
-# }
-
-# playing around with what values are needed to produce an interesting optimization result
-# adj.i <- 10
-# adj.a <- 1
-# adj.r <- 1
-
 outlist <- list()
-adj.grid <- expand.grid(adj.i = seq(from = 7, to = 13, by = 1.5),
+adj.grid <- expand.grid(adj.i = seq(from = 10, to = 13, by = 1),
                         adj.a = seq(from = .25, to = 1, by = .25),
-                        adj.r = seq(from = 1, to = 2, by = .5))
+                        adj.r = seq(from = 1, to = 2, by = .25))
+
 # for (j in 1:2) {
 for (j in 1:nrow(adj.grid)) {
   print(j)
@@ -180,7 +159,7 @@ for (j in 1:nrow(adj.grid)) {
   }
 
   # number of different budget constraint values to consider
-  n = 3
+  n = 35
 
   # initialize optimization results data.frame
   res <- data.frame(poip = rep(NA, n),
@@ -191,124 +170,61 @@ for (j in 1:nrow(adj.grid)) {
                     converge = rep(NA, n))
 
   # specify lower and upper bounds for sequence of budgets to consider
-  budget <- seq(from = 1e6, to = 9e6, length.out = n)
+  budget <- seq(from = 4e6, to = 9e6, length.out = n)
 
-  for (i in 1:n) {
-    solnp <- solnp(c(.01, 100, 100),
-                   obj_fun, #function to optimise
-                   eqfun=budget_constraint, #equality function
-                   eqB=budget[i],   #the equality constraint
-                   LB=c(0,0,0), #lower bound for parameters i.e. greater than zero
-                   UB=c(0.10, 2000, 2000),
-                   control = list(inner.iter = 16000)) #upper bound for parameters
-    # solnp <- solnp(c(.01, 100, 100),
-    #                obj_fun, #function to optimise
-    #                eqfun=budget_constraint, #equality function
-    #                eqB=budget[i],   #the equality constraint
-    #                LB=c(0,0,0), #lower bound for parameters i.e. greater than zero
-    #                UB=c(0.05, 3588, 3199)) #upper bound for parameters
-    pars <- solnp$pars
-    res$poip[i] <- pars[1]
-    res$poac[i] <- pars[2]
-    res$porc[i] <- pars[3]
-    res$infAvert[i] <- - last(solnp$values)
-    res$converge[i] <- solnp$convergence
-    res$budget[i] <- budget[i]
+  if (!(j %in% c(57, 73, 74))) {
+    for (i in 1:n) {
+      # if (i == 1 & j == 36) {
+      #   browser()
+      # }
+      # c(runif(n = 1, 0, .1), runif(n = 1, 0, 2000), runif(n = 1, 0, 2000)
+      #c(.05, 1000, 1000)
+      solnp <- solnp(c(.05, 1000, 1000),
+                     obj_fun,
+                     eqfun=budget_constraint,
+                     eqB=budget[i],
+                     LB=c(0,0,0),
+                     UB=c(0.10, 2000, 2000),
+                     control = list(rho = 1,
+                                    outer.iter = 2000,
+                                    inner.iter = 16000,
+                                    tol = 9e-8,
+                                    delta = 1e-7,
+                                    trace = 1))
+
+      pars <- solnp$pars
+      res$poip[i] <- pars[1]
+      res$poac[i] <- pars[2]
+      res$porc[i] <- pars[3]
+      res$infAvert[i] <- - last(solnp$values)
+      res$converge[i] <- solnp$convergence
+      res$budget[i] <- budget[i]
+
+    }
   }
+
   outlist[[j]] <- res
 }
 save(outlist, file = "adj_grid_outlist_loglink.rda")
-#
-adj.i <- 10
-adj.a <- .75
-adj.r <- 1.5
-
-cost.i <- adj.i * (80 * 790 * 100)
-cost.a <- adj.a * (511.38 * 10)
-cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
-
-budget_constraint <- function(x) {
-  # x[1] - init, x[2] - adhr, x[3] - retn
-  cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
-}
-
-# UPTAKE $ CAP 316000 * adj
-# ADHERENCE $ CAP 18348314 * adj
-# RETENTION $ CAP 7006152 * adj
+save <- outlist#
+load("adj_grid_outlist_loglink.rda")
 
 
-# test budget constraint
-budget_constraint(x = c(.01, 100, 100))
 
-# test optimization function for single budget constraint value
-#the optimization function - minimises by default
-solnp <- solnp(c(.01, 100, 100), # starting values
-               obj_fun, # function to optimise
-               eqfun = budget_constraint, # budget constraint function
-               eqB=9e5,   # the budget constraint
-               LB=c(0,0,0), # lower bound for parameters i.e. greater than zero
-               UB=c(0.10, 2000, 2000),
-               control = list(inner.iter = 800)) #upper bound for parameters
-
-# parameters that yield maximum infections averted
-solnp$pars
-# indication of optimization convergence
-solnp$convergence
-# objective function output values for each iteration of optimization algorithm
-solnp$values
-# plugging optimal parameter values back into objective function to verify output
-obj_fun(solnp$pars)
-
-
-# number of different budget constraint values to consider
-n = 100
-
-# initialize optimization results data.frame
-res <- data.frame(poip = rep(NA, n),
-                  poac = rep(NA, n),
-                  porc = rep(NA, n),
-                  infAvert = rep(NA, n),
-                  budget = rep(NA, n),
-                  converge = rep(NA, n))
-
-
-# specify lower and upper bounds for sequence of budgets to consider
-budget <- seq(from = 9e5, to = 9e6, length.out = n)
-
-for (i in 1:n) {
-  solnp <- solnp(c(.01, 100, 100),
-                 obj_fun, #function to optimise
-                 eqfun=budget_constraint, #equality function
-                 eqB=budget[i],   #the equality constraint
-                 LB=c(0,0,0), #lower bound for parameters i.e. greater than zero
-                 UB=c(0.10, 2000, 2000),
-                 control = list(inner.iter = 800)) #upper bound for parameters
-  # solnp <- solnp(c(.01, 100, 100),
-  #                obj_fun, #function to optimise
-  #                eqfun=budget_constraint, #equality function
-  #                eqB=budget[i],   #the equality constraint
-  #                LB=c(0,0,0), #lower bound for parameters i.e. greater than zero
-  #                UB=c(0.05, 3588, 3199)) #upper bound for parameters
-  pars <- solnp$pars
-  res$poip[i] <- pars[1]
-  res$poac[i] <- pars[2]
-  res$porc[i] <- pars[3]
-  res$infAvert[i] <- - last(solnp$values)
-  res$converge[i] <- solnp$convergence
-  res$budget[i] <- budget[i]
-}
-
+res <- outlist[[i]]
 # discard optimizations that did not converge
 res_plot <- res %>% filter(converge == 0)
-
-res_plot <- outlist[[95]]
 # plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
 ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
 ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
 ggplot(data = res_plot, aes(x = budget, y = porc)) + geom_line()
 ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
-
 # plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
+
+cost.i <- adj.grid[i,]$adj.i * (80 * 790 * 100)
+cost.a <- adj.grid[i,]$adj.a * (511.38 * 10)
+cost.r <- adj.grid[i,]$adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+
 ggplot(data = res_plot, aes(x = budget, y = poip * cost.i / budget)) +
   geom_line() +
   ylab("Proportion of Budget in Uptake")
@@ -319,26 +235,18 @@ ggplot(data = res_plot, aes(x = budget, y = porc * cost.r / budget)) +
   geom_line() +
   ylab("Proportion of Budget in Retention")
 
-scam <- scam(data = df_prep_10yr,
-             formula = infAvert ~ s(POIP, bs = "micv", k = 6) + s(POAC_yr, bs = "micv", k = 6) + s(PORC, bs = "micv", k = 6) + ti(POIP, PORC, k = 3) + ti(POIP, POAC_yr, k = 3) +  ti(POAC_yr, PORC, k = 3),
-             family = Gamma(link = "log"))
+# discard optimizations that did not converge
+res_plot <- res %>% filter(converge == 0)
 
-plot(scam)
+######################
 
-n = 101
+n = 51
 grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
                        POAC_yr = seq(0, 2000, length.out = n),
                        PORC = seq(0, 2000, length.out = n))
-pred <- exp(predict(scam,
+pred <- exp(predict(gam,
                 newdata = grid.df))
 pred.df <- cbind(pred, grid.df)
-
-# ggplot(pred.df %>% filter(PORC == 0, POAC_yr == 0), aes(x = POIP, y = pred)) + geom_point() + ylim(0, 120)
-# ggplot(pred.df %>% filter(POIP == 0, PORC == 0), aes(x = POAC_yr, y = pred)) + geom_point() + ylim(0, 120)
-# ggplot(pred.df %>% filter(POIP == 0, POAC_yr == 0), aes(x = PORC, y = pred)) + geom_point() + ylim(0, 120)
-
-# ggplot(pred.df %>% filter(PORC > 1000, PORC < 1100, POAC_yr == 0), aes(x = POIP, y = pred)) + geom_point() + ylim(0, 120)
-# ggplot(pred.df %>% filter(POIP > 0.05, POIP < 0.055, POAC_yr == 0), aes(x = PORC, y = pred)) + geom_point() + ylim(0, 120)
 
 porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP)) &
                              (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr)))
@@ -356,3 +264,59 @@ poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == medi
 
 ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POAC_yr))
 
+
+# adj.i <- 10
+# adj.a <- 1
+# adj.r <- 1
+#
+# cost.i <- adj.i * (80 * 790 * 100)
+# cost.a <- adj.a * (511.38 * 10)
+# cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+#
+# budget_constraint <- function(x) {
+#   # x[1] - init, x[2] - adhr, x[3] - retn
+#   cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
+# }
+#
+# # number of different budget constraint values to consider
+# n = 50
+#
+# # initialize optimization results data.frame
+# res <- data.frame(poip = rep(NA, n),
+#                   poac = rep(NA, n),
+#                   porc = rep(NA, n),
+#                   infAvert = rep(NA, n),
+#                   budget = rep(NA, n),
+#                   converge = rep(NA, n))
+#
+# # specify lower and upper bounds for sequence of budgets to consider
+# budget <- seq(from = 1e6, to = 9e6, length.out = n)
+#
+# for (i in 1:n) {
+#
+#   i = 30
+#   # if (i == 1 & j == 36) {
+#   #   browser()
+#   # }
+#   solnp <- solnp(c(.09, 100, 1500),
+#                  obj_fun,
+#                  eqfun=budget_constraint,
+#                  eqB=budget[i],
+#                  LB=c(0,0,0),
+#                  UB=c(0.10, 2000, 2000),
+#                  control = list(rho = 1,
+#                                 outer.iter = 10000,
+#                                 inner.iter = 8000,
+#                                 tol = 1e-7,
+#                                 delta = 1e-7,
+#                                 trace = 1))
+#
+#   pars <- solnp$pars
+#   res$poip[i] <- pars[1]
+#   res$poac[i] <- pars[2]
+#   res$porc[i] <- pars[3]
+#   res$infAvert[i] <- - last(solnp$values)
+#   res$converge[i] <- solnp$convergence
+#   res$budget[i] <- budget[i]
+#
+# }
