@@ -1,6 +1,7 @@
 library(dplyr)
 library(psych)
 library(ggplot2)
+library(tidyverse)
 library(scam)
 # package for generalized additive models (gam)
 library(mgcv)
@@ -138,10 +139,10 @@ obj_fun <- function(x) {
 }
 
 outlist <- list()
-adj.grid <- expand.grid(adj.i = seq(from = 10, to = 13, by = 1),
-                        adj.a = seq(from = .25, to = 1, by = .25),
-                        adj.r = seq(from = 1, to = 2, by = .25))
-
+adj.grid <- expand.grid(adj.i = seq(from = 10, to = 15, by = 2.5),
+                        adj.a = seq(from = .5, to = 1, by = .25),
+                        adj.r = seq(from = .25, to = 2, by = .25))
+save(adj.grid, file = "adj.grid2.rda")
 # for (j in 1:2) {
 for (j in 1:nrow(adj.grid)) {
   print(j)
@@ -159,7 +160,7 @@ for (j in 1:nrow(adj.grid)) {
   }
 
   # number of different budget constraint values to consider
-  n = 35
+  n = 50
 
   # initialize optimization results data.frame
   res <- data.frame(poip = rep(NA, n),
@@ -170,9 +171,9 @@ for (j in 1:nrow(adj.grid)) {
                     converge = rep(NA, n))
 
   # specify lower and upper bounds for sequence of budgets to consider
-  budget <- seq(from = 4e6, to = 9e6, length.out = n)
+  budget <- seq(from = 3e6, to = 9e6, length.out = n)
 
-  if (!(j %in% c(57, 73, 74))) {
+  if (!(j %in% c(67))) {
     for (i in 1:n) {
       # if (i == 1 & j == 36) {
       #   browser()
@@ -205,15 +206,27 @@ for (j in 1:nrow(adj.grid)) {
 
   outlist[[j]] <- res
 }
-save(outlist, file = "adj_grid_outlist_loglink.rda")
+save(outlist, file = "adj_grid_outlist_loglink2.rda")
 save <- outlist#
-load("adj_grid_outlist_loglink.rda")
+load("adj_grid_outlist_loglink2.rda")
 
 
-
+i = 8
 res <- outlist[[i]]
+
+cost.i <- adj.grid[i,]$adj.i * (80 * 790 * 100)
+cost.a <- adj.grid[i,]$adj.a * (511.38 * 10)
+cost.r <- adj.grid[i,]$adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
 # discard optimizations that did not converge
-res_plot <- res %>% filter(converge == 0)
+res_plot <- res %>%
+  filter(converge == 0) %>%
+  rowwise() %>%
+  mutate(poip_budget_prop = poip * cost.i / budget,
+         poac_budget_prop = poac * cost.a / budget,
+         porc_budget_prop = porc * cost.r / budget,
+         poip_budget = poip * cost.i,
+         poac_budget = poac * cost.a,
+         porc_budget = porc * cost.r)
 # plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
 ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
 ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
@@ -221,9 +234,19 @@ ggplot(data = res_plot, aes(x = budget, y = porc)) + geom_line()
 ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
 # plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
 
-cost.i <- adj.grid[i,]$adj.i * (80 * 790 * 100)
-cost.a <- adj.grid[i,]$adj.a * (511.38 * 10)
-cost.r <- adj.grid[i,]$adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+res_plot_area_prop <- res_plot %>%
+  pivot_longer(cols = c(poip_budget_prop, poac_budget_prop, porc_budget_prop),
+               names_to = "program")
+
+ggplot(res_plot_area_prop, aes(x = budget, y = value, fill = program)) +
+  geom_area()
+
+res_plot_area <- res_plot %>%
+  pivot_longer(cols = c(poip_budget, poac_budget, porc_budget),
+               names_to = "program")
+ggplot(res_plot_area, aes(x = budget, y = value, fill = program)) +
+  geom_area()
+
 
 ggplot(data = res_plot, aes(x = budget, y = poip * cost.i / budget)) +
   geom_line() +
@@ -264,59 +287,95 @@ poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == medi
 
 ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POAC_yr))
 
+############
 
 # adj.i <- 10
 # adj.a <- 1
-# adj.r <- 1
-#
-# cost.i <- adj.i * (80 * 790 * 100)
-# cost.a <- adj.a * (511.38 * 10)
-# cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
-#
-# budget_constraint <- function(x) {
-#   # x[1] - init, x[2] - adhr, x[3] - retn
-#   cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
-# }
-#
-# # number of different budget constraint values to consider
-# n = 50
-#
-# # initialize optimization results data.frame
-# res <- data.frame(poip = rep(NA, n),
-#                   poac = rep(NA, n),
-#                   porc = rep(NA, n),
-#                   infAvert = rep(NA, n),
-#                   budget = rep(NA, n),
-#                   converge = rep(NA, n))
-#
-# # specify lower and upper bounds for sequence of budgets to consider
-# budget <- seq(from = 1e6, to = 9e6, length.out = n)
-#
-# for (i in 1:n) {
-#
-#   i = 30
-#   # if (i == 1 & j == 36) {
-#   #   browser()
-#   # }
-#   solnp <- solnp(c(.09, 100, 1500),
-#                  obj_fun,
-#                  eqfun=budget_constraint,
-#                  eqB=budget[i],
-#                  LB=c(0,0,0),
-#                  UB=c(0.10, 2000, 2000),
-#                  control = list(rho = 1,
-#                                 outer.iter = 10000,
-#                                 inner.iter = 8000,
-#                                 tol = 1e-7,
-#                                 delta = 1e-7,
-#                                 trace = 1))
-#
-#   pars <- solnp$pars
-#   res$poip[i] <- pars[1]
-#   res$poac[i] <- pars[2]
-#   res$porc[i] <- pars[3]
-#   res$infAvert[i] <- - last(solnp$values)
-#   res$converge[i] <- solnp$convergence
-#   res$budget[i] <- budget[i]
-#
-# }
+# adj.r <- .25
+
+adj.i <- 10
+adj.a <- 1000
+adj.r <- .25
+
+cost.i <- adj.i * (80 * 790 * 100)
+cost.a <- adj.a * (511.38 * 10)
+cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+
+budget_constraint <- function(x) {
+  # x[1] - init, x[2] - adhr, x[3] - retn
+  cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
+}
+
+# number of different budget constraint values to consider
+n = 50
+
+# initialize optimization results data.frame
+res <- data.frame(poip = rep(NA, n),
+                  poac = rep(NA, n),
+                  porc = rep(NA, n),
+                  infAvert = rep(NA, n),
+                  budget = rep(NA, n),
+                  converge = rep(NA, n))
+
+# specify lower and upper bounds for sequence of budgets to consider
+budget <- seq(from = 1e6, to =6e6, length.out = n)
+
+for (i in 1:n) {
+
+
+  # if (i == 1 & j == 36) {
+  #   browser()
+  # }
+  solnp <- solnp(c(.02, 100, 1000),
+                 obj_fun,
+                 eqfun=budget_constraint,
+                 eqB=budget[i],
+                 LB=c(0,0,0),
+                 UB=c(0.10, 2000, 2000),
+                 control = list(rho = 1,
+                                outer.iter = 10000,
+                                inner.iter = 8000,
+                                tol = 5e-7,
+                                delta = 1e-7,
+                                trace = 1))
+
+  pars <- solnp$pars
+  res$poip[i] <- pars[1]
+  res$poac[i] <- pars[2]
+  res$porc[i] <- pars[3]
+  res$infAvert[i] <- - last(solnp$values)
+  res$converge[i] <- solnp$convergence
+  res$budget[i] <- budget[i]
+
+}
+
+res_plot <- res %>%
+  filter(converge == 0) %>%
+  rowwise() %>%
+  mutate(poip_budget_prop = poip * cost.i / budget,
+         poac_budget_prop = poac * cost.a / budget,
+         porc_budget_prop = porc * cost.r / budget,
+         poip_budget = poip * cost.i,
+         poac_budget = poac * cost.a,
+         porc_budget = porc * cost.r)
+
+# plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
+
+res_plot_area_prop <- res_plot %>%
+  pivot_longer(cols = c(poip_budget_prop, poac_budget_prop, porc_budget_prop),
+               names_to = "program")
+
+ggplot(res_plot_area_prop, aes(x = budget, y = value, fill = program)) +
+  geom_area()
+
+res_plot_area <- res_plot %>%
+  pivot_longer(cols = c(poip_budget, poac_budget, porc_budget),
+               names_to = "program")
+ggplot(res_plot_area, aes(x = budget, y = value, fill = program)) +
+  geom_area()
+
+ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
+ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
+ggplot(data = res_plot, aes(x = budget, y = porc)) + geom_line()
+ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
+
