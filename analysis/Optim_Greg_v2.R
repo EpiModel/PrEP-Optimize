@@ -78,7 +78,7 @@ df_prep_10yr <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 2000, POAC_yr < 200
 gam <- gam(data = df_prep_10yr,
            formula = infAvert ~ s(POIP, k = 4) + s(POAC_yr, k = 4) + s(PORC, k = 4) + ti(POIP, PORC, k = 4) + ti(POIP, POAC_yr, k = 4) + ti(PORC, POAC_yr, k = 4),
            family = Gamma(link = "log"))
-
+gam.check(gam)
 plot(gam, scheme = 1)
 plot(gam, scheme = 2)
 plot(gam, scheme = 3)
@@ -150,8 +150,14 @@ for (j in 1:nrow(adj.grid)) {
   adj.a <- adj.grid$adj.a[j]
   adj.r <- adj.grid$adj.r[j]
 
+  # 100 due to percentage
+  # $0.79/click and 1000 clicks to 1 app user (assumption)
+  # 80 is related to the proportion of potential app users vs the target population (PrEP indicated individuals)
   cost.i <- adj.i * (80 * 790 * 100)
-  cost.a <- adj.a * (511.38 * 10)
+  # 983.39 is basecase estimate for one-time per person cost at PrEP initiation
+  cost.a <- adj.a * (983.39 * 10)
+  # 77.17 is one-time per person cost at PrEP initiation
+  # 50.17 is monthly cost per person
   cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
 
   budget_constraint <- function(x) {
@@ -263,7 +269,7 @@ res_plot <- res %>% filter(converge == 0)
 
 ######################
 
-n = 51
+n = 101
 grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
                        POAC_yr = seq(0, 2000, length.out = n),
                        PORC = seq(0, 2000, length.out = n))
@@ -271,31 +277,31 @@ pred <- exp(predict(gam,
                 newdata = grid.df))
 pred.df <- cbind(pred, grid.df)
 
-porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP)) &
-                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr)))
+porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) | POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
 
 ggplot(porc, aes(x = PORC, y = pred, color = POAC_yr)) + geom_point() + facet_wrap(.~as.factor(POIP))
 
-poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP)) &
-                             (PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC)))
+poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) |  POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+                             (PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)))
 
 ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POIP))
 
 
-poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC)) &
-                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr)))
+poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)) &
+                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
 
 ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POAC_yr))
 
 ############
 
-# adj.i <- 10
-# adj.a <- 1
-# adj.r <- .25
-
 adj.i <- 10
-adj.a <- 1000
-adj.r <- .25
+adj.a <- 1
+adj.r <- .33
+
+# adj.i <- 10
+# adj.a <- 1000
+# adj.r <- .25
 
 cost.i <- adj.i * (80 * 790 * 100)
 cost.a <- adj.a * (511.38 * 10)
@@ -307,7 +313,7 @@ budget_constraint <- function(x) {
 }
 
 # number of different budget constraint values to consider
-n = 50
+n = 200
 
 # initialize optimization results data.frame
 res <- data.frame(poip = rep(NA, n),
@@ -318,14 +324,17 @@ res <- data.frame(poip = rep(NA, n),
                   converge = rep(NA, n))
 
 # specify lower and upper bounds for sequence of budgets to consider
-budget <- seq(from = 1e6, to =6e6, length.out = n)
+budget <- seq(from = .7e6, to =6e6, length.out = n)
 
 for (i in 1:n) {
 
 
   # if (i == 1 & j == 36) {
   #   browser()
-  # }
+  # # }
+  # c(runif(1, .02, .08), runif(1, 100, 1800), runif(1, 100, 1800)
+  # #
+
   solnp <- solnp(c(.02, 100, 1000),
                  obj_fun,
                  eqfun=budget_constraint,
@@ -335,7 +344,7 @@ for (i in 1:n) {
                  control = list(rho = 1,
                                 outer.iter = 10000,
                                 inner.iter = 8000,
-                                tol = 5e-7,
+                                tol =2e-7,
                                 delta = 1e-7,
                                 trace = 1))
 
@@ -348,6 +357,7 @@ for (i in 1:n) {
   res$budget[i] <- budget[i]
 
 }
+save(res, file = "optim_res.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%

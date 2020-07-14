@@ -1,0 +1,184 @@
+---
+title: "PrEP Optimization Summary"
+author: "Greg Knowlton, Emeli Anderson, Sam Jenness"
+date: "7/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+# Required packages
+library(dplyr)
+library(psych)
+library(ggplot2)
+library(tidyverse)
+# package for generalized additive models (gam)
+library(mgcv)
+
+# Import optimization results
+load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res.rda")
+# Import simulation output
+df_prep <- readRDS("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/data/prepOptim-Yearly-v4-1000sets-250per.rds")
+
+# Linear costs for PrEP support program capacities
+cost.i <- 10 * (80 * 790 * 100)
+cost.a <- 1 * (511.38 * 10)
+cost.r <- 0.33 * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+```
+
+```{r, include = FALSE}
+# translate weekly adherence capacity into yearly capacity
+df_prep$POAC_yr <- df_prep$POAC*52
+
+# calculate 10-year outcomes
+df_prep_10yr <- full_join(df_prep %>% group_by(scenario) %>%
+                            summarise_at(vars(incid, infAvert, PrEPStarts),
+                                         sum),
+                          df_prep %>% group_by(scenario) %>%
+                            summarise_at(vars(PrEPHighAdr, prepElig, prepCurr, pCov, PrEPHighAdr),
+                                         mean),
+                          by="scenario")
+
+df_prep_10yr <- full_join(df_prep_10yr,
+                          df_prep %>% group_by(scenario) %>%
+                            summarise_at(vars(POIP, PORC, POAC_yr),
+                                         first),
+                          by = "scenario")
+
+df_prep_10yr <- full_join(df_prep_10yr,
+                          df_prep %>% group_by(scenario) %>%
+                            summarise_at(vars(OptimInitStarts, OptimAdhrStarts, OptimRetnStarts),
+                                         sum),
+                          by="scenario")
+```
+
+Simulation Output Visualization:
+
+The outcome we are looking at here is the proportion of active PrEP users who are highly adherent. We expect this proportion to go up with increasing adherence intervention capacity. At a certain point, this highly adherent proportion stops increasing with adherence capacity because all new PrEP users are already enrolled in the adherence intervention. When the uptake intervention is well-funded (High PrEP Uptake), a greater adherence capacity can be utilized. Consequently, we see the proportion of active PrEP users who are highly adherent start to plateau at a lower adherence capacity when PrEP uptake is also low.
+
+```{r}
+
+df_prep_10yr$POIP_cat <- cut(df_prep_10yr$POIP, quantile(df_prep_10yr$POIP, c(0, .25, .75, 1)), labels = c("Low PrEP Uptake", "Medium PrEP Uptake", "High PrEP Uptake"), include.lowest = TRUE)
+
+ggplot(df_prep_10yr, aes(x = POAC_yr, y = PrEPHighAdr, color = POIP_cat)) + geom_jitter() + scale_color_manual(values = c("#D55E00", "#999999", "#009E73"))
+```
+The y-axis denotes the mean PrEP coverage proportion for each simulation over the course of the 10 year time horizon. Increasing the rate of PrEP uptake and the average length of time each PrEP user stays on the medication will both raise overall coverage levels. Increasing retention intervention capacity raises coverage levels until the capacity exceeds the number of PrEP users who can utilize the capacity. Increasing PrEP uptake shifts this point of excessive retention capacity to a higher value. Visually speaking, it appears that marginal effect of retention capacity on PrEP coverage is the same at all levels of PrEP uptake, except in the space where retention capacity exceeds demand. If infections averted is a function of PrEP coverage, then this suggests that the lack of a synergistic interaction between the uptake and retention interventions when retention demand is not exceeded.
+
+```{r}
+ggplot(df_prep_10yr, aes(x = PORC, y = pCov, color = POIP_cat)) + geom_jitter() + scale_color_manual(values = c("#D55E00", "#999999", "#009E73"))
+```
+This figure shows the same dynamics in a slightly different way. The higher retention capacity values don't lead to an increase in PrEP coverage, and the relationship between coverage levels and POIP appears to be roughly linear and independent of retention capacity. 
+
+```{r}
+# POIP has a similar range of effects on pCov as PORC
+# Most PORC values are much higher than prevalent PrEP users, leading to thick band
+df_prep_10yr$PORC_cat <- cut(df_prep_10yr$PORC, quantile(df_prep_10yr$PORC, c(0, .25, .75, 1)), labels = c("Low Retention Capacity", "Medium Retention", "High Retention Capacity"), include.lowest = TRUE)
+ggplot(df_prep_10yr, aes(x = POIP, y = pCov, color = PORC_cat)) + geom_jitter() + scale_color_manual(values = c("#D55E00", "#999999", "#009E73"))
+```
+We use a generalized additive model (GAM) to fit a flexible and smooth function to our simulation output. In this statistical modeling approach, our outcome is cumulative infections averted, and the predictors of interest are uptake program initiation proportion (POIP), retention program capacity (PORC), and adherence program capacity (POAC_yr). Like generalized linear models, GAMs are specified by a link function and a mean variance relationship (family). Because our outcome (infections averted) is positive and continuous, we used a Gamma family mean-variance relationship, and we chose to use a log link function because it provided the best fit to our data. GAMs 
+
+```{r}
+gam <- gam(data = df_prep_10yr,
+           formula = infAvert ~ s(POIP, k = 4) + s(POAC_yr, k = 4) + s(PORC, k = 4) + ti(POIP, PORC, k = 4) + ti(POIP, POAC_yr, k = 4) + ti(PORC, POAC_yr, k = 4),
+           family = Gamma(link = "log"))
+```
+
+
+```{r}
+vis.gam(gam, view = c("PORC", "POIP"))
+vis.gam(gam, view = c("POIP", "PORC"))
+vis.gam(gam, view = c("PORC", "POIP"), plot.type = "contour")
+```
+
+```{r}
+vis.gam(gam, view = c("POAC_yr", "POIP"))
+vis.gam(gam, view = c("POIP", "POAC_yr"))
+vis.gam(gam, view = c("POAC_yr", "POIP"), plot.type = "contour")
+```
+
+```{r}
+vis.gam(gam, view = c("POAC_yr", "PORC"))
+vis.gam(gam, view = c("PORC", "POAC_yr"))
+vis.gam(gam, view = c("POAC_yr", "PORC"), plot.type = "contour")
+```
+
+
+```{r}
+n = 101
+grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
+                       POAC_yr = seq(0, 2000, length.out = n),
+                       PORC = seq(0, 2000, length.out = n))
+pred <- exp(predict(gam,
+                newdata = grid.df))
+pred.df <- cbind(pred, grid.df)
+
+porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) | POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
+
+ggplot(porc, aes(x = PORC, y = pred, color = POAC_yr)) + geom_point() + facet_wrap(.~as.factor(POIP))
+
+poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) |  POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+                             (PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)))
+
+ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POIP))
+
+
+poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)) &
+                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
+
+ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POAC_yr))
+
+```
+
+Costs:
+~$632,000 per percentage point increase to PrEP Optimization Initiation Proportion
+~$5,100 per yearly adherence intervention capacity slot
+~$720 per retention intervention capacity slot (each slot used for an average of 337 days)
+
+```{r}
+
+res_plot <- res %>%
+  filter(converge == 0) %>%
+  rowwise() %>%
+  mutate(poip_budget_prop = poip * cost.i / budget,
+         poac_budget_prop = poac * cost.a / budget,
+         porc_budget_prop = porc * cost.r / budget,
+         poip_budget = poip * cost.i,
+         poac_budget = poac * cost.a,
+         porc_budget = porc * cost.r)
+# plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
+ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
+ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
+ggplot(data = res_plot, aes(x = budget, y = porc)) + geom_line()
+ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
+# plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
+
+res_plot_area_prop <- res_plot %>%
+  pivot_longer(cols = c(poip_budget_prop, poac_budget_prop, porc_budget_prop),
+               names_to = "program")
+
+ggplot(res_plot_area_prop, aes(x = budget, y = value, fill = program)) +
+  geom_area()
+
+res_plot_area <- res_plot %>%
+  pivot_longer(cols = c(poip_budget, poac_budget, porc_budget),
+               names_to = "program")
+ggplot(res_plot_area, aes(x = budget, y = value, fill = program)) +
+  geom_area()
+
+
+ggplot(data = res_plot, aes(x = budget, y = poip * cost.i / budget)) +
+  geom_line() +
+  ylab("Proportion of Budget in Uptake")
+ggplot(data = res_plot, aes(x = budget, y = poac * cost.a / budget)) +
+  geom_line() +
+  ylab("Proportion of Budget in Adherence")
+ggplot(data = res_plot, aes(x = budget, y = porc * cost.r / budget)) +
+  geom_line() +
+  ylab("Proportion of Budget in Retention")
+
+```
+
+
+
