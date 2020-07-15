@@ -295,6 +295,27 @@ ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(
 
 ############
 
+
+#
+# porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) | POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+#                              (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
+#
+# ggplot(porc, aes(x = PORC, y = pred, color = POAC_yr)) + geom_point() + facet_wrap(.~as.factor(POIP))
+#
+# poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) |  POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+#                              (PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)))
+#
+# ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POIP))
+#
+#
+# poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)) &
+#                              (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
+#
+# ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POAC_yr))
+
+
+##########
+
 adj.i <- 10
 adj.a <- 1
 adj.r <- .33
