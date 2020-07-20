@@ -13,10 +13,11 @@ The model parameters representing policy levers being considered:
 
 •	POIP – percentage of MSM reached by initiation intervention
 
-•	POAC_yr – adherence intervention capacity (max. number of people who can receive the intervention per year)
+•	POAC – adherence intervention capacity (max. number of people who can receive the intervention per year)
 
 •	PORC – retention intervention capacity (max. number of people who can be active in the intervention in any given week)
 
+These are referred to synonymously as "Uptake Capacity", "Adherence Capacity", and "Retention Capacity".
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
@@ -120,39 +121,27 @@ gam <- gam(data = df_prep_10yr,
 ```
 
 
-We can visualize the generalized additive model predictions for infections averted to get a sense of how the program parameters interact and affect outcomes. On these plots, "response" is infections averted, and on the three dimensional plots, the axes span the entire allowable range of each capacity parameter (POIP: 0-0.10, POAC_yr: 0-2000, PORC: 0-2000). 
-
-As a reminder:
-
-•	POIP – percentage of MSM reached by initiation intervention
-
-•	POAC_yr – adherence intervention capacity (max. number of people who can receive the intervention per year)
-
-•	PORC – retention intervention capacity (max. number of people who can be active in the intervention in any given week)
-
-The "response" on these plots (the z-axis height and the value on the contour lines) is the predicted number of infections averted.
-
-Note: These interaction plots are made automatically through the mgcv package, and I will work on customizing these plots to improve their readability, translate the axes into economic terms, and show the path of the optimal resource allocation as a parametric function of budget size.
+We can visualize the generalized additive model predictions for infections averted to get a sense of how the program parameters interact and affect outcomes. On the three dimensional and contour plots, the axes span the entire allowable range of each capacity parameter (Uptake Capacity: 0-0.10, Adherence Capacity: 0-2000, Retention Capacity: 0-2000). 
 
 Uptake/Retention Interaction plots:
 
 ```{r vis_gam}
-vis.gam(gam, view = c("PORC", "POIP"), type = "response", theta = -45)
-vis.gam(gam, view = c("PORC", "POIP"), plot.type = "contour", type = "response")
+vis.gam(gam, view = c("PORC", "POIP"), type = "response", theta = -45, xlab = "Retention Capacity", ylab = "Uptake Capacity", zlab = "Infections Averted")
+vis.gam(gam, view = c("PORC", "POIP"), plot.type = "contour", type = "response", xlab = "Retention Capacity", ylab = "Uptake Capacity", main = "Infections Averted Contour")
 ```
 
 Uptake/Adherence Interaction plots:
 
 ```{r}
-vis.gam(gam, view = c("POAC_yr", "POIP"), type = "response", theta = -45)
-vis.gam(gam, view = c("POAC_yr", "POIP"), plot.type = "contour", type = "response")
+vis.gam(gam, view = c("POAC_yr", "POIP"), type = "response", theta = -45, xlab = "Adherence Capacity", ylab = "Uptake Capacity", zlab = "Infections Averted")
+vis.gam(gam, view = c("POAC_yr", "POIP"), plot.type = "contour", type = "response", xlab = "Adherence Capacity", ylab = "Uptake Capacity", main = "Infections Averted Contour")
 ```
 
 Adherence/Retention Interaction plots:
 
 ```{r}
-vis.gam(gam, view = c("POAC_yr", "PORC"), type = "response", theta = -45)
-vis.gam(gam, view = c("POAC_yr", "PORC"), plot.type = "contour", type = "response")
+vis.gam(gam, view = c("POAC_yr", "PORC"), type = "response", theta = -45, xlab = "Adherence Capacity", ylab = "Retention Capacity", zlab = "Infections Averted")
+vis.gam(gam, view = c("POAC_yr", "PORC"), plot.type = "contour", type = "response", xlab = "Adherence Capacity", ylab = "Retention Capacity", main = "Infections Averted")
 ```
 
 The y-axis denotes the predicted number of infections averted based on the generalized additive model and three different intervention capacity values. The plot has three facets for the minimum, median, and maximum values for the uptake intervention parameter, and each curve is color-coded according the minimum, median, and maximum adherence intervention capacity. This allows one to visualize the effect of changing retention capacity on infections averted at various combinations of the other program capacities.
