@@ -5,6 +5,7 @@ suppressMessages(library("foreach"))
 
 list.files("data/")
 fn <- list.files("data/", pattern = "sim", full.names = TRUE)
+fn
 
 doParallel::registerDoParallel(parallel::detectCores())
 tdf <- foreach(i = 1:length(fn)) %dopar% {
@@ -22,22 +23,19 @@ tdf <- foreach(i = 1:length(fn)) %dopar% {
 }
 
 tdf <- data.frame(do.call("rbind", tdf), stringsAsFactors = FALSE)
-head(tdf, 20); str(tdf)
 names(tdf) <- c("batch", "pFrac")
 tdf[2] <- sapply(tdf[2], as.numeric)
-save(tdf, file = "data/tdf2.rda")
+head(tdf, 20); str(tdf)
+save(tdf, file = "data/hold/tdf2.FSonly.rda")
 
-load("data/tdf2.rda")
+targets <- c(0.15)
+tdf$diff <- abs(tdf$pFrac - targets[1])
 
-tdf_sel <- tdf[which(round(tdf$pFrac, 4) == 0.1500), ]
-tdf_sel
+head(plyr::arrange(tdf, diff), 25)
 
-#       batch         i.prev.dx.B i.prev.dx.H i.prev.dx.W
-# 10726 n1001.442.2   0.3327749   0.1267496  0.08396303
-
-load("data/sim.n500.8.rda")
+load("data/sim.n400.6.rda")
 ls()
-s1 <- get_sims(sim, sims = 18)
+s1 <- get_sims(sim, sims = 26)
 
 df <- as.data.frame(s1)
 df <- select(df, prepCurr, prepElig)
@@ -49,7 +47,7 @@ pFrac
 # Save as best-fitting
 sim <- s1
 
-saveRDS(sim, file = "est/burnin.ATL.3race.Prep15.rda", compress = "xz")
+saveRDS(sim, file = "est/burnin.ATL.3race.FSonly.Prep15.rda", compress = "xz")
 
-load("burnin/burnin2/data/sim.n500.8.rda")
-save(sim, file = "burnin/burnin2/data/sim.n500.8.rda", compress = "xz")
+load("data/sim.n400.6.rda")
+save(sim, file = "data/hold/sim.n400.6.rda", compress = "xz")

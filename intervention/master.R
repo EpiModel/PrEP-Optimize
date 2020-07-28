@@ -5,16 +5,19 @@ library("EpiModelHPC")
 
 # Reference Scenario ---------------------------------------------
 
-vars <- list(PSP = 0.66,
-             PHA = 0,
-             PRD = 224.4237)
+vars <- list(POIP = 0,
+             PSPO = 0.07,
+             POAC = 0,
+             PADO = 0.399,
+             PORC = 0,
+             PDRO = 1.54)
+# vars <- NULL
 sbatch_master(vars = vars,
-              master.file = "intervention/master.sh",
-              runsim.file = "runsim.sh",
-              param.sheet = "intervention/params.csv",
-              simno.start = 1000,
-              ckpt = TRUE,
-              nsims = 250,
+              working.dir = "intervention/",
+              master.file = "master.base.sh",
+              simno.start = 0,
+              ckpt = FALSE,
+              nsims = 252,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")
@@ -22,36 +25,104 @@ sbatch_master(vars = vars,
 
 # Counterfactual Scenarios ---------------------------------------------
 
+# Ranges
+# POIP: 0-0.50
+# PSPO: 0.07
+# POAC: 0-70
+# PADO: 0.399
+# PORC: 0-3200
+# PDRO: 1.54
+
 library("lhs")
 
-set.seed(12345)
-l <- randomLHS(1000, 3)
+set.seed(234567)
+total.set.size <- 5000
+l <- randomLHS(total.set.size, 3)
 
-PSP <- c(0.66, 1.00)
-PHA <- c(0.00, 0.216)
-PRD <- c(224.4237*1, 224.4237*4)
+POIP <- c(0, 0.50)
+POAC <- c(0, 70)
+PORC <- c(0, 3200)
 
-PSPs <- (l[, 1]*(PSP[2]-PSP[1]))+PSP[1]
-PHAs <- (l[, 2]*(PHA[2]-PHA[1]))+PHA[1]
-PRDs <- (l[, 3]*(PRD[2]-PRD[1]))+PRD[1]
+POIPs <- round((l[, 1]*(POIP[2]-POIP[1]))+POIP[1], 4)
+POACs <- floor((l[, 2]*(POAC[2]-POAC[1]))+POAC[1])
+PORCs <- floor((l[, 3]*(PORC[2]-PORC[1]))+PORC[1])
 
-vars <- list(PSP = PSPs,
-             PHA = PHAs,
-             PRD = PRDs)
-vars
+vars <- list(POIP = POIPs,
+             PSPO = 0.07,
+             POAC = POACs,
+             PADO = 0.399,
+             PORC = PORCs,
+             PDRO = 1.54)
+vars <- as.data.frame(vars)
+head(as.data.frame(vars))
+str(vars)
 
-sbatch_master(vars = vars,
+simno <- 5500:5999
+
+sbatch_master(vars = vars[simno - 999, ],
               expand.vars = FALSE,
-              master.file = "intervention/master.lhs.sh",
+              working.dir = "intervention/",
+              master.file = "master.lhs.curr.sh",
               runsim.file = "runsim.sh",
-              param.sheet = "intervention/params.csv",
-              simno.start = 1001,
+              simno.start = min(simno),
               append = FALSE,
               ckpt = TRUE,
-              nsims = 500,
+              nsims = 112,
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")
 
 
+# Counterfactual Scenario Revisions: June 2020 ----------------------------
 
+# Limited counterfactual ranges by on suggestion by GK
+
+# Ranges
+# POIP: 0-0.50
+# PSPO: 0.07
+# POAC: 0-70
+# PADO: 0.399
+# PORC: 0-3200
+# PDRO: 1.54
+
+library("lhs")
+
+set.seed(234567)
+total.set.size <- 5000
+l <- randomLHS(total.set.size, 3)
+
+POIP <- c(0, 0.10)
+POAC <- c(0, 40)
+PORC <- c(0, 2000)
+
+POIPs <- round((l[, 1]*(POIP[2]-POIP[1]))+POIP[1], 4)
+POACs <- floor((l[, 2]*(POAC[2]-POAC[1]))+POAC[1])
+PORCs <- floor((l[, 3]*(PORC[2]-PORC[1]))+PORC[1])
+
+vars <- list(POIP = POIPs,
+             PSPO = 0.07,
+             POAC = POACs,
+             PADO = 0.399,
+             PORC = PORCs,
+             PDRO = 1.54)
+vars <- as.data.frame(vars)
+head(as.data.frame(vars))
+str(vars)
+
+save(vars, file = "intervention/cfVars-5k.rda")
+load("intervention/cfVars-5k.rda")
+
+simno <- 800:1000
+
+sbatch_master(vars = vars[simno, ],
+              expand.vars = FALSE,
+              working.dir = "intervention/",
+              master.file = "master.lhs.curr.sh",
+              runsim.file = "runsim.sh",
+              simno.start = min(simno),
+              append = FALSE,
+              ckpt = FALSE,
+              nsims = 252,
+              ncores = 28,
+              walltime = "00:30:00",
+              mem = "100G")

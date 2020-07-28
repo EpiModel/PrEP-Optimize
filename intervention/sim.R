@@ -4,61 +4,53 @@ library("methods")
 suppressMessages(library("EpiModelHIV"))
 
 ## Environmental Arguments
-pull_env_vars(num.vars = c("PSP", "PHA", "PRD"))
+pull_env_vars(num.vars = c("POIP", "PSPO", "POAC", "PADO", "PORC", "PDRO"))
 
 ## Parameters
 netstats <- readRDS("est/netstats.rda")
 epistats <- readRDS("est/epistats.rda")
-burnin <- readRDS("est/burnin.ATL.3race.Prep15.rda")
+burnin <- readRDS("est/burnin.ATL.3race.FSonly.rda")
 
 param <- param_msm(netstats = netstats,
                    epistats = epistats,
-                   hiv.test.rate = c(0.00432, 0.00425, 0.00730),
-                   hiv.test.late.prob = c(0, 0, 0),
-                   tx.init.prob = c(0.1775, 0.190, 0.2521),
-                   tt.part.supp = c(0.45, 0.40, 0.28),
-                   tt.full.supp = c(0.55, 0.60, 0.72),
-                   tt.dur.supp = c(0, 0, 0),
-                   tx.halt.part.prob = c(0.009, 0.0084, 0.00768),
-                   tx.halt.full.rr = c(0.45, 0.45, 0.45),
-                   tx.halt.dur.rr = c(0.45, 0.45, 0.45),
-                   tx.reinit.part.prob = c(0.0115, 0.0135, 0.0205),
-                   tx.reinit.full.rr = c(1, 1, 1),
-                   tx.reinit.dur.rr = c(1, 1, 1),
-                   max.time.off.tx.full.int = 52 * 15,
-                   max.time.on.tx.part.int = 52 * 10,
-                   max.time.off.tx.part.int = 52 * 10,
-                   aids.mr = 1/250,
-                   trans.scale = c(2.64, 0.45, 0.285),
-                   acts.scale = 1.00,
-                   acts.aids.vl = 5.75,
-                   prep.start = 52*61,
+                   trans.scale = c(2.21, 0.405, 0.255),
+                   prep.start = (52*60) + 1,
                    riskh.start = 52*59,
-                   prep.start.prob = PSP,
-                   prep.adhr.dist = reallocate_pcp(c(0.089, 0.127, 0.784), reall = PHA),
-                   prep.discont.rate = 1 - (2^(-1/(PRD/7))),
+                   prep.adhr.hr = c(0.69, 0.19, 0.01),
+                   prep.start.prob = 0.715,
+                   prep.adhr.dist = reallocate_pcp(c(0.089, 0.127, 0.784), -0.184),
+                   prep.discont.rate = 1 - (2^(-1/(224.4/7))),
                    prep.require.lnt = TRUE,
-                   prep.risk.reassess.method = "year")
-init <- init_msm(prev.ugc = 0,
-                 prev.rct = 0,
-                 prev.rgc = 0,
-                 prev.uct = 0)
+                   prep.risk.reassess.method = "year",
+                   prep.optim.start =  (52*65) + 1,
+                   prep.optim.init.prob = POIP,
+                   prep.start.prob.optim = PSPO,
+                   prep.optim.adhr.cap = POAC,
+                   prep.adhr.dist.optim = reallocate_pcp(c(0.089, 0.127, 0.784), -0.184+PADO),
+                   prep.optim.retn.cap = PORC,
+                   prep.discont.rate.optim = 1 - (2^(-1/(PDRO*224.4/7))))
+init <- init_msm()
 control <- control_msm(simno = fsimno,
-                       start = (52*66) + 1,
-                       nsteps = 52*76,
+                       start = (52*60) + 1,
+                       nsteps = 52*75,
                        nsims = ncores,
                        ncores = ncores,
                        initialize.FUN = reinit_msm,
                        save.nwstats = FALSE,
                        save.clin.hist = FALSE)
 
-
 ## Simulation
 sim <- netsim(burnin, param, init, control)
 
 # Merging
 savesim(sim, save.min = TRUE, save.max = FALSE)
-
-vars <- c("incid", "s.num", "ir100", "prepCurr", "prepCurr.hadr", "prepElig", "prep.rand.stop")
+vars <- c("ir100", "incid", "num", "i.prev", "i.prev.dx",
+          "prepCurr", "prepElig",
+          "OptimInitStarts", "OptimInitPrev",
+          "PrEPStarts", "PrEPStartsOptim",
+          "OptimAdhrStarts", "OptimAdhrPrev", "PrEPHighAdr",
+          "OptimRetnStarts", "OptimRetnPrev",
+          "PrEPStopsInd", "PrEPStopsRand", "PrEPStopsRandOptim")
 process_simfiles(simno = simno, min.n = njobs, nsims = nsims,
-                 truncate.at = 52*66, vars = vars)
+                 truncate.at = 52*60, vars = vars)
+

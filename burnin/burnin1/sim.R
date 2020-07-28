@@ -9,7 +9,7 @@ pull_env_vars()
 ## Parameters
 netstats <- readRDS("est/netstats.rda")
 epistats <- readRDS("est/epistats.rda")
-burnin <- readRDS("est/burnin.ATL.3race.FSonly.rda")
+est <- readRDS("est/netest.rda")
 
 param <- param_msm(netstats = netstats,
                    epistats = epistats,
@@ -34,7 +34,7 @@ param <- param_msm(netstats = netstats,
                    acts.aids.vl = 5.75,
                    prep.start = (52*60) + 1,
                    riskh.start = 52*59,
-                   prep.start.prob = 0.712,
+                   prep.start.prob = 0.66,
                    prep.require.lnt = TRUE,
                    prep.risk.reassess.method = "year")
 init <- init_msm(prev.ugc = 0,
@@ -42,20 +42,16 @@ init <- init_msm(prev.ugc = 0,
                  prev.rgc = 0,
                  prev.uct = 0)
 control <- control_msm(simno = fsimno,
-                       start = (52*60) + 1,
-                       nsteps = 52*65,
+                       nsteps = 52 * 60,
                        nsims = ncores,
                        ncores = ncores,
-                       initialize.FUN = reinit_msm,
                        save.nwstats = FALSE,
                        save.clin.hist = FALSE)
 
 ## Simulation
-sim <- netsim(burnin, param, init, control)
+sim <- netsim(est, param, init, control)
+# savesim(sim, save.min = TRUE, save.max = FALSE, compress = FALSE)
+savesim(sim, save.min = FALSE, save.max = TRUE, compress = TRUE, time.stamp = FALSE)
 
 # Merging
-# savesim(sim, save.min = TRUE, save.max = FALSE)
-savesim(sim, save.min = FALSE, save.max = TRUE, compress = FALSE, time.stamp = FALSE)
-
-# process_simfiles(simno = simno, min.n = njobs, nsims = nsims,
-#                  truncate.at = 52*60)
+# process_simfiles(simno = simno, min.n = njobs, nsims = nsims)

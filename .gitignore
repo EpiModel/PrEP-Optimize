@@ -8,3 +8,6 @@ burnin/burnin2/data/*.rda
 est/*.rda
 estimation/*.rda
 intervention/data/*.rda
+analysis/data/*.rda
+intervention/params.csv
+PrEP-Optim/
