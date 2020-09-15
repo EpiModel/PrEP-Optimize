@@ -40,34 +40,34 @@ df_prep_10yr <- full_join(df_prep_10yr,
 # only consider POIP < 5% -- higher values are likely unreasonable
 # df_prep_10yr <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 1700, POAC_yr < 2000)
 
-df_prep_vis <- df_prep_10yr %>% filter(POIP <= 0.10)
-# PrEPHighAdr plateaus at lower values of POAC when POIP is low
-ggplot(df_prep_vis, aes(x = POAC_yr, y = PrEPHighAdr)) + geom_point()
-# POAC has no influence of pCov (this is working as intended)
-ggplot(df_prep_vis, aes(x = POAC_yr, y = pCov)) + geom_point()
-
-# PORC has no influence on PrEPHighAdr (working as intended)
-# Thick horizontal band at top appears because most POAC values dwarf weekly PrEP initiations (esp at lower POIP values)
-ggplot(df_prep_vis, aes(x = PORC, y = PrEPHighAdr)) + geom_point()
-# pCov plateaus at lower PORC values (and at a lower pCov) when POIP is low
-# With lowest POIP values, PORC provides a ~3.5% bump to pCov
-ggplot(df_prep_vis, aes(x = PORC, y = pCov)) + geom_point()
-
-ggplot(df_prep_vis, aes(x = POIP, y = PrEPHighAdr)) + geom_point()
-# POIP has a similar range of effects on pCov as PORC
-# Most PORC values are much higher than prevalent PrEP users, leading to thick band
-ggplot(df_prep_vis, aes(x = POIP, y = pCov)) + geom_point()
-
-df_prep_vis <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 2000, POAC_yr < 2000)
-
-ggplot(df_prep_vis, aes(x = POAC_yr, y = PrEPHighAdr)) + geom_point()
-ggplot(df_prep_vis, aes(x = POAC_yr, y = pCov)) + geom_point()
-
-ggplot(df_prep_vis, aes(x = PORC, y = PrEPHighAdr)) + geom_point()
-ggplot(df_prep_vis, aes(x = PORC, y = pCov)) + geom_point()
-
-ggplot(df_prep_vis, aes(x = POIP, y = PrEPHighAdr)) + geom_point()
-ggplot(df_prep_vis, aes(x = POIP, y = pCov)) + geom_point()
+# df_prep_vis <- df_prep_10yr %>% filter(POIP <= 0.10)
+# # PrEPHighAdr plateaus at lower values of POAC when POIP is low
+# ggplot(df_prep_vis, aes(x = POAC_yr, y = PrEPHighAdr)) + geom_point()
+# # POAC has no influence of pCov (this is working as intended)
+# ggplot(df_prep_vis, aes(x = POAC_yr, y = pCov)) + geom_point()
+#
+# # PORC has no influence on PrEPHighAdr (working as intended)
+# # Thick horizontal band at top appears because most POAC values dwarf weekly PrEP initiations (esp at lower POIP values)
+# ggplot(df_prep_vis, aes(x = PORC, y = PrEPHighAdr)) + geom_point()
+# # pCov plateaus at lower PORC values (and at a lower pCov) when POIP is low
+# # With lowest POIP values, PORC provides a ~3.5% bump to pCov
+# ggplot(df_prep_vis, aes(x = PORC, y = pCov)) + geom_point()
+#
+# ggplot(df_prep_vis, aes(x = POIP, y = PrEPHighAdr)) + geom_point()
+# # POIP has a similar range of effects on pCov as PORC
+# # Most PORC values are much higher than prevalent PrEP users, leading to thick band
+# ggplot(df_prep_vis, aes(x = POIP, y = pCov)) + geom_point()
+#
+# df_prep_vis <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 2000, POAC_yr < 2000)
+#
+# ggplot(df_prep_vis, aes(x = POAC_yr, y = PrEPHighAdr)) + geom_point()
+# ggplot(df_prep_vis, aes(x = POAC_yr, y = pCov)) + geom_point()
+#
+# ggplot(df_prep_vis, aes(x = PORC, y = PrEPHighAdr)) + geom_point()
+# ggplot(df_prep_vis, aes(x = PORC, y = pCov)) + geom_point()
+#
+# ggplot(df_prep_vis, aes(x = POIP, y = PrEPHighAdr)) + geom_point()
+# ggplot(df_prep_vis, aes(x = POIP, y = pCov)) + geom_point()
 
 
 df_prep_10yr <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 2000, POAC_yr < 2000)
@@ -78,16 +78,16 @@ df_prep_10yr <- df_prep_10yr %>% filter(POIP <= 0.10, PORC < 2000, POAC_yr < 200
 gam <- gam(data = df_prep_10yr,
            formula = 100*(infAvert/1199.484) ~ s(POIP, k = 5) + s(POAC_yr, k = 5) + s(PORC, k = 6) + ti(POIP, PORC, k = 6) + ti(POIP, POAC_yr, k = 3) + ti(PORC, POAC_yr, k = 6),
            family = Gamma(link = "log"), method = "REML")
-gam.check(gam)
-plot(gam, scheme = 1)
-plot(gam, scheme = 2)
-plot(gam, scheme = 3)
-vis.gam(gam, view = c("PORC", "POIP"))
-vis.gam(gam, view = c("PORC", "POIP"), plot.type = "contour")
-vis.gam(gam, view = c("POAC_yr", "POIP"))
-vis.gam(gam, view = c("POAC_yr", "POIP"), plot.type = "contour")
-vis.gam(gam, view = c("POAC_yr", "PORC"))
-vis.gam(gam, view = c("POAC_yr", "PORC"), plot.type = "contour")
+# gam.check(gam)
+# plot(gam, scheme = 1)
+# plot(gam, scheme = 2)
+# plot(gam, scheme = 3)
+# vis.gam(gam, view = c("PORC", "POIP"))
+# vis.gam(gam, view = c("PORC", "POIP"), plot.type = "contour")
+# vis.gam(gam, view = c("POAC_yr", "POIP"))
+# vis.gam(gam, view = c("POAC_yr", "POIP"), plot.type = "contour")
+# vis.gam(gam, view = c("POAC_yr", "PORC"))
+# vis.gam(gam, view = c("POAC_yr", "PORC"), plot.type = "contour")
 
 # coef(gam)
 # gam
@@ -128,8 +128,8 @@ vis.gam(gam, view = c("POAC_yr", "PORC"), plot.type = "contour")
 
 
 
-exp(predict(gam, newdata = data.frame(POIP = .01, POAC_yr = 1000, PORC = 1000)))
-predict(gam, newdata = data.frame(POIP = 0, POAC_yr = 0, PORC = 0))
+# exp(predict(gam, newdata = data.frame(POIP = .01, POAC_yr = 1000, PORC = 1000)))
+# predict(gam, newdata = data.frame(POIP = 0, POAC_yr = 0, PORC = 0))
 
 # Objective function: InfAvert~capacity parameters
 # Predict from fitted model
@@ -138,213 +138,213 @@ obj_fun <- function(x) {
   - exp(predict(gam, newdata = data.frame(POIP = x[1], POAC_yr = x[2], PORC = x[3])))
 }
 
-outlist <- list()
-adj.grid <- expand.grid(adj.i = seq(from = 10, to = 15, by = 2.5),
-                        adj.a = seq(from = .5, to = 1, by = .25),
-                        adj.r = seq(from = .25, to = 2, by = .25))
-save(adj.grid, file = "adj.grid2.rda")
+# outlist <- list()
+# adj.grid <- expand.grid(adj.i = seq(from = 10, to = 15, by = 2.5),
+#                         adj.a = seq(from = .5, to = 1, by = .25),
+#                         adj.r = seq(from = .25, to = 2, by = .25))
+# save(adj.grid, file = "adj.grid2.rda")
 # for (j in 1:2) {
-for (j in 1:nrow(adj.grid)) {
-  print(j)
-  adj.i <- adj.grid$adj.i[j]
-  adj.a <- adj.grid$adj.a[j]
-  adj.r <- adj.grid$adj.r[j]
-
-  # 100 due to percentage
-  # $0.79/click and 1000 clicks to 1 app user (assumption)
-  # 80 is related to the proportion of potential app users vs the target population (PrEP indicated individuals)
-  cost.i <- adj.i * (80 * 790 * 100)
-  # 983.39 is basecase estimate for one-time per person cost at PrEP initiation
-  cost.a <- adj.a * (983.39 * 10)
-  # 77.17 is one-time per person cost at PrEP initiation
-  # 50.17 is monthly cost per person
-  cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
-
-
-
-
-
-  # No location-based overhead because there are no clinic visits or other in-person contact
-  # HIV Test Shipping
-  # $7 twice per year
-  # STI Test Shipping
-  # $16.25 twice per year
-  # SMART Fee (for messaging) and Server/App Hosting Fees are non-negligible, but will not scale with capacity significantly
-  # Using Facebook Advertising costs as a tool for predicting advertising costs--this will be the major driver of costs via capacity.
-  # ~12,000 MSM
-  # ~9000 HIV- MSM
-  # ~8000 undiagnosed MSM not on PrEP
-  # POIP of 1% implies 80 of these individuals are using the app
-  # Roughly 80 * $395 is per percentage point unit cost based on capacity
-  # $0.79/click and 500 clicks to 1 app user (assumption)
-  # If 10% of newly indicated individuals are going to be caught and referred to PrEP,
-  # we are interpreting that to mean that 10% of undiagnosed MSM not on PrEP are actively using the app
-  # 80 individuals on app is 1% or .01 poip
-  # because poip is on a 0-1 scale, we need to multiply by a factor of 100
-  # How do we take the fact that people are starting and stopping app use into account?
-  # Assume app users stay on app for 6 months on average--
-  cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
-
-
-  # 983.39 is basecase estimate for one-time per person cost at PrEP initiation
-  # Personnel costs for an RN paid at median hourly wage in Atlanta for 6 total hours (6 hour-long sessions) $52.53
-  # 315.18 for 6 hours
-  # Overhead (paying for clinic space) calculated using CMS Outpatient provider fee schedule
-  # (practice expense for non-facility for 60 min preventative medicine visit) -- 41.06 per hour
-  # for 6 hours this comes out to 246 dollars
-  # no cost for direct medical expenses
-  # $3.90 in costs for printed educational, planning, and other counseling materials
-  # cost is incurred right when someone starts intervention, which lasts 6 sessions always
-  # POAC_yr is total number allowed to start each year, so cost should be multiplied by 10 because we are looking at 10 years total
-  # maybe some of these costs could be covered by insurance? From the perspective of insurance, they would likely not be approved.
-  cost.a <- adj.a * ( (315.18+246+3.90) * 10)
-
-  # Certain costs are accrued over the duration of time that someone is on PrEP/enrolled in the intervention
-  # PrEP visits (initial and follow up) would be paid for through insurance, whereas some costs would have to be absorbed by the CDC budget
-  # These costs will be calculated based on the median duration of time someone in the retention intervention will stay on PrEP
-  # 4 HIV testing kits shipped per year at $7 per each, 2 STI test shipping at 16.25 per each
-  # For one year and 1 capacity slot, 365/337 will newly initiate
-  # $60.5 will be spent on shipping tests for each person year on intervention
-  # 1 total person year will be used
-  # Assume 15 min/person-year of use of testing support call-in line a 49.74/hr wage of RN
-  # $12.44 per person year
-  # Assuming PrEP@Home can be effectively advertised at PrEP initiation
-  # 77.17 is one-time per person cost at PrEP initiation
-  # 50.17 is monthly cost per person
-  cost.r <- adj.r * 10 * (60.5 + 12.44)
-
-  budget_constraint <- function(x) {
-    # x[1] - init, x[2] - adhr, x[3] - retn
-    cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
-  }
-
-  # number of different budget constraint values to consider
-  n = 50
-
-  # initialize optimization results data.frame
-  res <- data.frame(poip = rep(NA, n),
-                    poac = rep(NA, n),
-                    porc = rep(NA, n),
-                    infAvert = rep(NA, n),
-                    budget = rep(NA, n),
-                    converge = rep(NA, n))
-
-  # specify lower and upper bounds for sequence of budgets to consider
-  budget <- seq(from = 3e6, to = 9e6, length.out = n)
-
-  if (!(j %in% c(67))) {
-    for (i in 1:n) {
-      # if (i == 1 & j == 36) {
-      #   browser()
-      # }
-      # c(runif(n = 1, 0, .1), runif(n = 1, 0, 2000), runif(n = 1, 0, 2000)
-      #c(.05, 1000, 1000)
-      solnp <- solnp(c(.05, 1000, 1000),
-                     obj_fun,
-                     eqfun=budget_constraint,
-                     eqB=budget[i],
-                     LB=c(0,0,0),
-                     UB=c(0.10, 2000, 2000),
-                     control = list(rho = 1,
-                                    outer.iter = 2000,
-                                    inner.iter = 16000,
-                                    tol = 9e-8,
-                                    delta = 1e-7,
-                                    trace = 1))
-
-      pars <- solnp$pars
-      res$poip[i] <- pars[1]
-      res$poac[i] <- pars[2]
-      res$porc[i] <- pars[3]
-      res$infAvert[i] <- - last(solnp$values)
-      res$converge[i] <- solnp$convergence
-      res$budget[i] <- budget[i]
-
-    }
-  }
-
-  outlist[[j]] <- res
-}
-save(outlist, file = "adj_grid_outlist_loglink2.rda")
-save <- outlist#
-load("adj_grid_outlist_loglink2.rda")
-
-
-i = 8
-res <- outlist[[i]]
-
-cost.i <- adj.grid[i,]$adj.i * (80 * 790 * 100)
-cost.a <- adj.grid[i,]$adj.a * (511.38 * 10)
-cost.r <- adj.grid[i,]$adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
-# discard optimizations that did not converge
-res_plot <- res %>%
-  filter(converge == 0) %>%
-  rowwise() %>%
-  mutate(poip_budget_prop = poip * cost.i / budget,
-         poac_budget_prop = poac * cost.a / budget,
-         porc_budget_prop = porc * cost.r / budget,
-         poip_budget = poip * cost.i,
-         poac_budget = poac * cost.a,
-         porc_budget = porc * cost.r)
-# plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
-ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
-ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
-ggplot(data = res_plot, aes(x = budget, y = porc)) + geom_line()
-ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
-# plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
-
-res_plot_area_prop <- res_plot %>%
-  pivot_longer(cols = c(poip_budget_prop, poac_budget_prop, porc_budget_prop),
-               names_to = "program")
-
-ggplot(res_plot_area_prop, aes(x = budget, y = value, fill = program)) +
-  geom_area()
-
-res_plot_area <- res_plot %>%
-  pivot_longer(cols = c(poip_budget, poac_budget, porc_budget),
-               names_to = "program")
-ggplot(res_plot_area, aes(x = budget, y = value, fill = program)) +
-  geom_area()
+# for (j in 1:nrow(adj.grid)) {
+#   print(j)
+#   adj.i <- adj.grid$adj.i[j]
+#   adj.a <- adj.grid$adj.a[j]
+#   adj.r <- adj.grid$adj.r[j]
+#
+#   # 100 due to percentage
+#   # $0.79/click and 1000 clicks to 1 app user (assumption)
+#   # 80 is related to the proportion of potential app users vs the target population (PrEP indicated individuals)
+#   cost.i <- adj.i * (80 * 790 * 100)
+#   # 983.39 is basecase estimate for one-time per person cost at PrEP initiation
+#   cost.a <- adj.a * (983.39 * 10)
+#   # 77.17 is one-time per person cost at PrEP initiation
+#   # 50.17 is monthly cost per person
+#   cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+#
+#
+#
+#
+#
+#   # No location-based overhead because there are no clinic visits or other in-person contact
+#   # HIV Test Shipping
+#   # $7 twice per year
+#   # STI Test Shipping
+#   # $16.25 twice per year
+#   # SMART Fee (for messaging) and Server/App Hosting Fees are non-negligible, but will not scale with capacity significantly
+#   # Using Facebook Advertising costs as a tool for predicting advertising costs--this will be the major driver of costs via capacity.
+#   # ~12,000 MSM
+#   # ~9000 HIV- MSM
+#   # ~8000 undiagnosed MSM not on PrEP
+#   # POIP of 1% implies 80 of these individuals are using the app
+#   # Roughly 80 * $395 is per percentage point unit cost based on capacity
+#   # $0.79/click and 500 clicks to 1 app user (assumption)
+#   # If 10% of newly indicated individuals are going to be caught and referred to PrEP,
+#   # we are interpreting that to mean that 10% of undiagnosed MSM not on PrEP are actively using the app
+#   # 80 individuals on app is 1% or .01 poip
+#   # because poip is on a 0-1 scale, we need to multiply by a factor of 100
+#   # How do we take the fact that people are starting and stopping app use into account?
+#   # Assume app users stay on app for 6 months on average--
+#   cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
+#
+#
+#   # 983.39 is basecase estimate for one-time per person cost at PrEP initiation
+#   # Personnel costs for an RN paid at median hourly wage in Atlanta for 6 total hours (6 hour-long sessions) $52.53
+#   # 315.18 for 6 hours
+#   # Overhead (paying for clinic space) calculated using CMS Outpatient provider fee schedule
+#   # (practice expense for non-facility for 60 min preventative medicine visit) -- 41.06 per hour
+#   # for 6 hours this comes out to 246 dollars
+#   # no cost for direct medical expenses
+#   # $3.90 in costs for printed educational, planning, and other counseling materials
+#   # cost is incurred right when someone starts intervention, which lasts 6 sessions always
+#   # POAC_yr is total number allowed to start each year, so cost should be multiplied by 10 because we are looking at 10 years total
+#   # maybe some of these costs could be covered by insurance? From the perspective of insurance, they would likely not be approved.
+#   cost.a <- adj.a * ( (315.18+246+3.90) * 10)
+#
+#   # Certain costs are accrued over the duration of time that someone is on PrEP/enrolled in the intervention
+#   # PrEP visits (initial and follow up) would be paid for through insurance, whereas some costs would have to be absorbed by the CDC budget
+#   # These costs will be calculated based on the median duration of time someone in the retention intervention will stay on PrEP
+#   # 4 HIV testing kits shipped per year at $7 per each, 2 STI test shipping at 16.25 per each
+#   # For one year and 1 capacity slot, 365/337 will newly initiate
+#   # $60.5 will be spent on shipping tests for each person year on intervention
+#   # 1 total person year will be used
+#   # Assume 15 min/person-year of use of testing support call-in line a 49.74/hr wage of RN
+#   # $12.44 per person year
+#   # Assuming PrEP@Home can be effectively advertised at PrEP initiation
+#   # 77.17 is one-time per person cost at PrEP initiation
+#   # 50.17 is monthly cost per person
+#   cost.r <- adj.r * 10 * (60.5 + 12.44)
+#
+#   budget_constraint <- function(x) {
+#     # x[1] - init, x[2] - adhr, x[3] - retn
+#     cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
+#   }
+#
+#   # number of different budget constraint values to consider
+#   n = 50
+#
+#   # initialize optimization results data.frame
+#   res <- data.frame(poip = rep(NA, n),
+#                     poac = rep(NA, n),
+#                     porc = rep(NA, n),
+#                     infAvert = rep(NA, n),
+#                     budget = rep(NA, n),
+#                     converge = rep(NA, n))
+#
+#   # specify lower and upper bounds for sequence of budgets to consider
+#   budget <- seq(from = 3e6, to = 9e6, length.out = n)
+#
+#   if (!(j %in% c(67))) {
+#     for (i in 1:n) {
+#       # if (i == 1 & j == 36) {
+#       #   browser()
+#       # }
+#       # c(runif(n = 1, 0, .1), runif(n = 1, 0, 2000), runif(n = 1, 0, 2000)
+#       #c(.05, 1000, 1000)
+#       solnp <- solnp(c(.05, 1000, 1000),
+#                      obj_fun,
+#                      eqfun=budget_constraint,
+#                      eqB=budget[i],
+#                      LB=c(0,0,0),
+#                      UB=c(0.10, 2000, 2000),
+#                      control = list(rho = 1,
+#                                     outer.iter = 2000,
+#                                     inner.iter = 16000,
+#                                     tol = 9e-8,
+#                                     delta = 1e-7,
+#                                     trace = 1))
+#
+#       pars <- solnp$pars
+#       res$poip[i] <- pars[1]
+#       res$poac[i] <- pars[2]
+#       res$porc[i] <- pars[3]
+#       res$infAvert[i] <- - last(solnp$values)
+#       res$converge[i] <- solnp$convergence
+#       res$budget[i] <- budget[i]
+#
+#     }
+#   }
+#
+#   outlist[[j]] <- res
+# }
+# save(outlist, file = "adj_grid_outlist_loglink2.rda")
+# save <- outlist#
+# load("adj_grid_outlist_loglink2.rda")
 
 
-ggplot(data = res_plot, aes(x = budget, y = poip * cost.i / budget)) +
-  geom_line() +
-  ylab("Proportion of Budget in Uptake")
-ggplot(data = res_plot, aes(x = budget, y = poac * cost.a / budget)) +
-  geom_line() +
-  ylab("Proportion of Budget in Adherence")
-ggplot(data = res_plot, aes(x = budget, y = porc * cost.r / budget)) +
-  geom_line() +
-  ylab("Proportion of Budget in Retention")
-
-# discard optimizations that did not converge
-res_plot <- res %>% filter(converge == 0)
+# i = 8
+# res <- outlist[[i]]
+#
+# cost.i <- adj.grid[i,]$adj.i * (80 * 790 * 100)
+# cost.a <- adj.grid[i,]$adj.a * (511.38 * 10)
+# cost.r <- adj.grid[i,]$adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+# # discard optimizations that did not converge
+# res_plot <- res %>%
+#   filter(converge == 0) %>%
+#   rowwise() %>%
+#   mutate(poip_budget_prop = poip * cost.i / budget,
+#          poac_budget_prop = poac * cost.a / budget,
+#          porc_budget_prop = porc * cost.r / budget,
+#          poip_budget = poip * cost.i,
+#          poac_budget = poac * cost.a,
+#          porc_budget = porc * cost.r)
+# # plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
+# ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
+# ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
+# ggplot(data = res_plot, aes(x = budget, y = porc)) + geom_line()
+# ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
+# # plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
+#
+# res_plot_area_prop <- res_plot %>%
+#   pivot_longer(cols = c(poip_budget_prop, poac_budget_prop, porc_budget_prop),
+#                names_to = "program")
+#
+# ggplot(res_plot_area_prop, aes(x = budget, y = value, fill = program)) +
+#   geom_area()
+#
+# res_plot_area <- res_plot %>%
+#   pivot_longer(cols = c(poip_budget, poac_budget, porc_budget),
+#                names_to = "program")
+# ggplot(res_plot_area, aes(x = budget, y = value, fill = program)) +
+#   geom_area()
+#
+#
+# ggplot(data = res_plot, aes(x = budget, y = poip * cost.i / budget)) +
+#   geom_line() +
+#   ylab("Proportion of Budget in Uptake")
+# ggplot(data = res_plot, aes(x = budget, y = poac * cost.a / budget)) +
+#   geom_line() +
+#   ylab("Proportion of Budget in Adherence")
+# ggplot(data = res_plot, aes(x = budget, y = porc * cost.r / budget)) +
+#   geom_line() +
+#   ylab("Proportion of Budget in Retention")
+#
+# # discard optimizations that did not converge
+# res_plot <- res %>% filter(converge == 0)
 
 ######################
 
-n = 101
-grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
-                       POAC_yr = seq(0, 2000, length.out = n),
-                       PORC = seq(0, 2000, length.out = n))
-pred <- exp(predict(gam,
-                newdata = grid.df))
-pred.df <- cbind(pred, grid.df)
-
-porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) | POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
-                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
-
-ggplot(porc, aes(x = PORC, y = pred, color = POAC_yr)) + geom_point() + facet_wrap(.~as.factor(POIP))
-
-poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) |  POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
-                             (PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)))
-
-ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POIP))
-
-
-poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)) &
-                             (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
-
-ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POAC_yr))
+# n = 101
+# grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
+#                        POAC_yr = seq(0, 2000, length.out = n),
+#                        PORC = seq(0, 2000, length.out = n))
+# pred <- exp(predict(gam,
+#                 newdata = grid.df))
+# pred.df <- cbind(pred, grid.df)
+#
+# porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) | POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+#                              (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
+#
+# ggplot(porc, aes(x = PORC, y = pred, color = POAC_yr)) + geom_point() + facet_wrap(.~as.factor(POIP))
+#
+# poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP) |  POIP == quantile(POIP, 0.25) | POIP == quantile(POIP, 0.75)) &
+#                              (PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)))
+#
+# ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POIP))
+#
+#
+# poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == median(PORC) |  PORC == quantile(PORC, 0.25) | PORC == quantile(PORC, 0.75)) &
+#                              (POAC_yr == min(POAC_yr) | POAC_yr == max(POAC_yr) | POAC_yr == median(POAC_yr) | POAC_yr == quantile(POAC_yr, 0.25) | POAC_yr == quantile(POAC_yr, 0.75)))
+#
+# ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(.~as.factor(POAC_yr))
 
 ############
 
@@ -368,21 +368,102 @@ ggplot(poip, aes(x = POIP, y = pred, color = PORC)) + geom_point() + facet_wrap(
 
 
 #########
+for (j in 1:100) {
+  adj.i <- 1
+  adj.a <- j/100
+  adj.r <- 1
+
+  # adj.i <- 10
+  # adj.a <- 1000
+  # adj.r <- .25
+
+  # cost.i <- adj.i * (80 * 790 * 100)
+  cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
+  # cost.a <- adj.a * (511.38 * 10)
+  cost.a <- adj.a * ((315.18+246+3.90) * 10)
+  # cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+  cost.r <- adj.r * 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
+
+  budget_constraint <- function(x) {
+    # x[1] - init, x[2] - adhr, x[3] - retn
+    cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
+  }
+
+  # number of different budget constraint values to consider
+  n = 5
+
+  # initialize optimization results data.frame
+  res <- data.frame(poip = rep(NA, n),
+                    poac = rep(NA, n),
+                    porc = rep(NA, n),
+                    infAvert = rep(NA, n),
+                    budget = rep(NA, n),
+                    converge = rep(NA, n))
+
+  # specify lower and upper bounds for sequence of budgets to consider
+  budget <- c(700000, 1500000 , 3000000, 4500000, 6000000)
+
+  for (i in 1:n) {
+
+
+    # if (i == 1 & j == 36) {
+    #   browser()
+    # # }
+    # c(runif(1, .02, .08), runif(1, 100, 1800), runif(1, 100, 1800)
+    # c(.02, 100, 1000)
+    # #
+
+    solnp <- solnp(c(.05, 1000, 1000),
+                   obj_fun,
+                   eqfun=budget_constraint,
+                   eqB=budget[i],
+                   LB=c(0,0,0),
+                   UB=c(0.10, 2000, 2000),
+                   control = list(rho = 1,
+                                  outer.iter = 200,
+                                  inner.iter = 8000,
+                                  tol =5e-10,
+                                  delta = 1e-7,
+                                  trace = 1))
+
+    pars <- solnp$pars
+    res$poip[i] <- pars[1]
+    res$poac[i] <- pars[2]
+    res$porc[i] <- pars[3]
+    res$infAvert[i] <- - last(solnp$values)
+    res$converge[i] <- solnp$convergence
+    res$budget[i] <- budget[i]
+    res$adj.a <- adj.a
+  }
+
+  if (j != 1) {
+    df <- rbind(df, res)
+  } else {
+    df <- res
+  }
+}
+save(df, file = "optim_res_adh_df.rda")
+df <- df %>% arrange(budget)
+test <- df %>% select(budget, adj.a, poac)
+# .14 for 7,00000
+# .57 for 1,500,000
+# .56 for 3,000,000
+# .57 for 4,500,000
+# .54 for 6,000,000
+
+
+###########
 
 adj.i <- 1
-adj.a <- .48
+adj.a <- .54
 adj.r <- 1
 
-# adj.i <- 10
-# adj.a <- 1000
-# adj.r <- .25
-
 # cost.i <- adj.i * (80 * 790 * 100)
-cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
+cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
 # cost.a <- adj.a * (511.38 * 10)
 cost.a <- adj.a * ((315.18+246+3.90) * 10)
 # cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
-cost.r <- adj.r * 10 * (60.5 + 12.44)
+cost.r <- adj.r * 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
 
 budget_constraint <- function(x) {
   # x[1] - init, x[2] - adhr, x[3] - retn
@@ -405,14 +486,6 @@ budget <- seq(from = .7e6, to =6e6, length.out = n)
 
 for (i in 1:n) {
 
-
-  # if (i == 1 & j == 36) {
-  #   browser()
-  # # }
-  # c(runif(1, .02, .08), runif(1, 100, 1800), runif(1, 100, 1800)
-  # c(.02, 100, 1000)
-  # #
-
   solnp <- solnp(c(.05, 1000, 1000),
                  obj_fun,
                  eqfun=budget_constraint,
@@ -420,10 +493,10 @@ for (i in 1:n) {
                  LB=c(0,0,0),
                  UB=c(0.10, 2000, 2000),
                  control = list(rho = 1,
-                                outer.iter = 200,
-                                inner.iter = 8000,
-                                tol =5e-10,
-                                delta = 1e-7,
+                                outer.iter = 300,
+                                inner.iter = 10000,
+                                tol =3e-10,
+                                delta = 1.5e-7,
                                 trace = 1))
 
   pars <- solnp$pars
@@ -433,9 +506,9 @@ for (i in 1:n) {
   res$infAvert[i] <- - last(solnp$values)
   res$converge[i] <- solnp$convergence
   res$budget[i] <- budget[i]
-
+  res$adj.a <- adj.a
 }
-save(res, file = "optim_res_adh.rda")
+save(res, file = "optim_res_adh_costsharing.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%
@@ -476,13 +549,19 @@ adj.r <- 1
 # adj.i <- 10
 # adj.a <- 1000
 # adj.r <- .25
-
 # cost.i <- adj.i * (80 * 790 * 100)
-cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
+cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
 # cost.a <- adj.a * (511.38 * 10)
 cost.a <- adj.a * ((315.18+246+3.90) * 10)
 # cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
-cost.r <- adj.r * 10 * (60.5 + 12.44)
+cost.r <- adj.r * 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
+
+# # cost.i <- adj.i * (80 * 790 * 100)
+# cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
+# # cost.a <- adj.a * (511.38 * 10)
+# cost.a <- adj.a * ((315.18+246+3.90) * 10)
+# # cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
+# cost.r <- adj.r * 10 * (60.5 + 12.44)
 
 budget_constraint <- function(x) {
   # x[1] - init, x[2] - adhr, x[3] - retn
@@ -534,7 +613,7 @@ for (i in 1:n) {
   res$budget[i] <- budget[i]
 
 }
-save(res, file = "optim_res.rda")
+save(res, file = "optim_res_costsharing.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%
@@ -578,11 +657,11 @@ adj.r <- 1
 # adj.r <- .25
 
 # cost.i <- adj.i * (80 * 790 * 100)
-cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
+cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
 # cost.a <- adj.a * (511.38 * 10)
 cost.a <- adj.a * ((315.18+246+3.90) * 10)
 # cost.r <- adj.r * 10 * (77.17/(52 * 337/365) + (50.17 * (52/12)))
-cost.r <- adj.r * 10 * (60.5 + 12.44)
+cost.r <- adj.r * 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
 
 budget_constraint <- function(x) {
   # x[1] - init, x[2] - adhr, x[3] - retn
@@ -621,8 +700,8 @@ for (i in 1:5) {
                  control = list(rho = 1,
                                 outer.iter = 200,
                                 inner.iter = 8000,
-                                tol =8e-10,
-                                delta = 1e-7,
+                                tol =8e-9,
+                                delta = 2e-7,
                                 trace = 1))
 
   pars <- solnp$pars
@@ -634,7 +713,7 @@ for (i in 1:5) {
   res$budget[i] <- budget[i]
 
 }
-save(res, file = "optim_res_table.rda")
+save(res, file = "optim_res_table_costsharing.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%

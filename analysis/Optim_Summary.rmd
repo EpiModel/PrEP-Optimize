@@ -41,13 +41,13 @@ library(kableExtra)
 library(nima)
 
 # Import optimization results
-load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_table.rda")
+load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_table_costsharing.rda")
 table_optim <- res
 
 load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_adh.rda")
 adh_optim <- res
 
-load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res.rda")
+load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_costsharing.rda")
 # Import simulation output
 df_prep <- readRDS("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/data/prepOptim-Yearly-v4-1000sets-250per.rds")
 
@@ -481,10 +481,10 @@ res_plot <- adh_optim %>%
   filter(converge == 0) %>%
   rowwise() %>%
   mutate(poip_budget_prop = poip * cost.i / budget,
-         poac_budget_prop = poac * .48 * cost.a / budget,
+         poac_budget_prop = poac * .54 * cost.a / budget,
          porc_budget_prop = porc * cost.r / budget,
          poip_budget = poip * cost.i,
-         poac_budget = poac * .48 * cost.a,
+         poac_budget = poac * .54 * cost.a,
          porc_budget = porc * cost.r)
 
 # plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
