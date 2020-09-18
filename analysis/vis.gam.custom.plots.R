@@ -18,9 +18,9 @@ rm(list = setdiff(ls(), c("gam", "vis.gam.custom")))
 #                       n.grid = 300)
 
 # Linear costs for PrEP support program capacities
-cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
+cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
 cost.a <- ((315.18+246+3.90) * 10)
-cost.r <- 10 * (60.5 + 12.44)
+cost.r <- 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
 
 n <- 100
 
@@ -39,7 +39,7 @@ plot.dat <- data.frame(POIP = pred.df$POIP,
                        budget = pred.df$POIP * cost.i + pred.df$PORC * cost.r,
                        avert_pct = pred.df$pred)
 
-load("optim_res.rda")
+load("optim_res_costsharing.rda")
 res <- res %>% filter(converge == 0)
 res.plot.dat <- data.frame(POIP = res$poip,
                            PORC = res$porc,
@@ -54,7 +54,7 @@ res.plot.labs <- data.frame(POIP = res$poip,
                            POIP_c = res$poip * cost.i,
                            PORC_c = res$porc * cost.r,
                            budget = res$poip * cost.i + res$porc * cost.r,
-                           avert_pct = res$infAvert) %>% slice(1, 13, 39, 67, 95)
+                           avert_pct = res$infAvert) %>% slice(1, 16, 36, 64, 92)
 
 
 ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert_pct)) +

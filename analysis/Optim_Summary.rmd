@@ -1,8 +1,8 @@
 ---
 title: "PrEP Optimization Summary"
-subtitle: "Version 2"
+subtitle: "Version 3"
 author: "Greg Knowlton, Emeli Anderson, Sam Jenness"
-date: "8/3/2020"
+date: "9/17/2020"
 output:
   html_document:
     toc: true
@@ -38,13 +38,13 @@ library(tidyverse)
 library(mgcv)
 library(patchwork)
 library(kableExtra)
-library(nima)
+#library(nima)
 
 # Import optimization results
 load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_table_costsharing.rda")
 table_optim <- res
 
-load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_adh.rda")
+load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_adh_costsharing.rda")
 adh_optim <- res
 
 load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_costsharing.rda")
@@ -52,9 +52,9 @@ load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_costsharing.rda")
 df_prep <- readRDS("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/data/prepOptim-Yearly-v4-1000sets-250per.rds")
 
 # Linear costs for PrEP support program capacities
-cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * 46.5 * 80 * 100))
+cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
 cost.a <- ((315.18+246+3.90) * 10)
-cost.r <- 10 * (60.5 + 12.44)
+cost.r <- 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
 ```
 
 ```{r data_cleaning, include = FALSE}
@@ -245,7 +245,9 @@ The parameter that reflects the capacity of the uptake intervention, POIP, contr
   -App users will use the app for an average of 6 months
   -Advertising costs must be sustained over the full 10 years of the time-horizon
   
-Additionally, PrEP eligibility will be determined by the app based upon HIV tests and STI tests, among other things. While the tests themselves will not have to be paid for through the CDC budget, it is reasonable to expect that the shipment and handling of these tests must be covered by the CDC. It is assumed that the CDC will have to pay for the shipment of 2 HIV testing kits (\$7.00 each) and 2 STI testing kits (\$16.25 each) per year for each individual who is actively using the app.
+Additionally, PrEP eligibility will be determined by the app based upon HIV tests and STI tests, among other things. While the tests themselves will not have to be paid for through the CDC budget***, it is reasonable to expect that the shipment and handling of these tests must be covered by the CDC. It is assumed that the CDC will have to pay for the shipment of 2 HIV testing kits (\$7.00 each) and 2 STI testing kits (\$16.25 each) per year for each individual who is actively using the app.
+
+***Now assuming 10% cost-sharing for HIV/STI tests
 
 ### Adherence Intervention
 
@@ -255,15 +257,17 @@ It is expected that the behavioral counseling sessions associated with the Life-
 
 The parameter controlling retention capacity works a little differently than the parameter controlling adherence capacity in the simulation. Whereas the adherence capacity parameter defines the number of individuals who are allowed to start the adherence intervention in a year, the retention capacity parameter (PORC) defines the number of individuals who are allowed to be actively utilizing PrEP\@Home at any given time. Therefore, each unit of retention capacity represents an increase of 10 person-years of utilization of the services provided by PrEP\@Home. While on the intervention the shipment of 4 HIV testing kits (\$7.00 each) and 2 STI testing kits (\$16.25 each) must be paid for by the CDC per person-year of intervention utilization. Additionally, it is assumed that, on average, 15 minutes of call-in support will be required per person-year which translates to a cost of \$12.44 per person-year. 
 
-The other services associated with PrEP\@Home such as the diagnostic tests themselves and telehealth appointments are far more costly, but because they are required in standard PrEP care, it is expected that health insurance rather than the CDC will have to pay
+The other services associated with PrEP\@Home such as the diagnostic tests themselves and telehealth appointments are far more costly, but because they are required in standard PrEP care, it is expected that health insurance rather than the CDC will have to pay ***
+
+***Now assuming 10% cost-sharing for HIV/STI tests
 
 In summary, the following linear unit costs are assumed for the budget optimization problem, based on the assumptions outlined above:
 
-\$669,200.00 per percentage point increase to PrEP Optimization Initiation Proportion (POIP)
+\$69,130,560.00 per percentage point increase to PrEP Optimization Initiation Proportion (POIP)
 
 \$5,650.80 per yearly adherence intervention capacity slot (POAC)
 
-\$729.40 per retention intervention capacity slot (PORC)
+\$1,104.64 per retention intervention capacity slot (PORC)
 
 # Optimization Results
 
@@ -417,9 +421,9 @@ In Table 1 we can see the numerical summaries for the economic and epidemiologic
 
 Table 1:
 ```{r, fig.width=12, fig.height=8}
-# load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_table.rda")
+# load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_table_costsharing.rda")
 # table_optim <- res
-# 
+# library(nima)
 # table_optim <- table_optim %>% mutate(poip_spending = commas(round(poip * cost.i, 0)),
 #                                       poac_spending = commas(round(poac * cost.a, 0)),
 #                                       porc_spending = commas(round(porc * cost.r, 0)),
@@ -468,7 +472,8 @@ Table 1:
 #                                                 "Percentage of spending by intervention (%)" = 3,
 #                                                 "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
 #   gsub("@", "$", .)
-knitr::include_graphics("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/output_files/Outcome_table.png")
+
+knitr::include_graphics("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/output_files/Outcome_table_costsharing.png")
 ```
 
 # Sensitivity Analysis
