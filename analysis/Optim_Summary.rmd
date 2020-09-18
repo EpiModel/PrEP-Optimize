@@ -38,16 +38,21 @@ library(tidyverse)
 library(mgcv)
 library(patchwork)
 library(kableExtra)
-#library(nima)
+library(nima)
+library(viridis)
+library(metR)
+library(lubridate)
+library(scales)
+library(RColorBrewer)
 
 # Import optimization results
-load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_table_costsharing.rda")
+load("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/optim_data/optim_res_table.rda")
 table_optim <- res
 
-load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_adh_costsharing.rda")
+load("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/optim_data/optim_res_adh.rda")
 adh_optim <- res
 
-load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_costsharing.rda")
+load("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/optim_data/optim_res.rda")
 # Import simulation output
 df_prep <- readRDS("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/data/prepOptim-Yearly-v4-1000sets-250per.rds")
 
@@ -81,6 +86,7 @@ df_prep_10yr <- full_join(df_prep_10yr,
                             summarise_at(vars(OptimInitStarts, OptimAdhrStarts, OptimRetnStarts),
                                          sum),
                           by="scenario")
+
 ```
 
 # Simulation Output Exploration
@@ -127,7 +133,8 @@ ggplot(df_prep_10yr, aes(x = POIP, y = pCov, color = PORC_cat)) +
        x = "PrEP Intervention Initiation Percentage (Uptake Intervention Capacity)",
        color = "Retention Intervention Capacity Level") +
   theme_classic()
-  
+
+saveRDS(df_prep_10yr, file = "analysis/optim_data/df_prep_10yr.rda")  
 ```
 
 # Statistical Modeling
@@ -140,6 +147,8 @@ We use a generalized additive model (GAM) to fit a flexible and smooth function 
 gam <- gam(data = df_prep_10yr,
            formula = 100*(infAvert/1199.484) ~ s(POIP, k = 5) + s(POAC_yr, k = 5) + s(PORC, k = 6) + ti(POIP, PORC, k = 6) + ti(POIP, POAC_yr, k = 3) + ti(PORC, POAC_yr, k = 6),
            family = Gamma(link = "log"), method = "REML")
+
+saveRDS(gam, file = "analysis/optim_data/gam.rda")
 ```
 
 ### Uptake/Retention Interaction 
@@ -183,6 +192,8 @@ porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == medi
 porc$POIP_cat <- factor(porc$POIP, labels = c("Min Uptake", "Median Uptake", "Max Uptake"))
 porc$POAC_cat <- factor(porc$POAC, labels = c("Min Adherence", "Median Adherence", "Max Adherence"))
 
+saveRDS(porc, file = "analysis/optim_data/fig10_df.rda")
+
 ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) + 
   geom_point() + 
   facet_wrap(.~as.factor(POIP_cat)) +
@@ -203,6 +214,8 @@ poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == medi
 poac$POIP_cat <- factor(poac$POIP, labels = c("Min Uptake", "Median Uptake", "Max Uptake"))
 poac$PORC_cat <- factor(poac$PORC, labels = c("Min Retention", "Median Retention", "Max Retention"))
 
+saveRDS(poac, file = "analysis/optim_data/fig11_df.rda")
+
 ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC_cat)) +
   geom_point() + 
   facet_wrap(.~as.factor(POIP_cat)) +
@@ -222,6 +235,8 @@ poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == medi
 
 poip$POAC_cat <- factor(poip$POAC_yr, labels = c("Min Adherence", "Median Adherence", "Max Adherence"))
 poip$PORC_cat <- factor(poip$PORC, labels = c("Min Retention", "Median Retention", "Max Retention"))
+
+saveRDS(poip, file = "analysis/optim_data/fig12_df.rda")
 
 ggplot(poip, aes(x = POIP, y = pred, color = PORC_cat)) + 
   geom_point() + 
@@ -287,6 +302,9 @@ res_plot <- res %>%
          porc_budget = porc * cost.r,
          cost_per_inf = budget / (1199.484*infAvert/100),
          marg_cost_per_inf = (budget - lag(budget)) / (1199.484*(infAvert - lag(infAvert)))/100)
+
+saveRDS(res_plot, file = "analysis/optim_data/res_plot.rda")
+
 # plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
 infections_averted <- ggplot(data = res_plot, aes(x = budget/1000, y = infAvert)) + 
   geom_area() +
@@ -313,20 +331,7 @@ cpia_plot <- ggplot(data = res_plot, aes(x = budget/1000, y = cost_per_inf)) +
 
 cpia_plot
 ```
-
-Rather than assessing the overall cost per infection averted over the range of budget values, Figure 15 considers the average marginal increase cost per infection averted across the range of budget values. This can be conceptualized as the rate at which cost efficiency is worsening with diminished returns and other interactions.
-
-```{r}
-mcpia_plot <- ggplot(data = res_plot, aes(x = budget/1000, y = marg_cost_per_inf)) +
-  geom_area() +
-  labs(y = "Marginal increase in cost per infection averted ($)",
-       x = "Budget (per $1,000)",
-       title = "Figure 15") +
-  theme_classic()+
-  scale_x_continuous(breaks = round(seq(min(res_plot$budget/1000), max(res_plot$budget/1000), by = 500), 1), expand = c(0,0))
-
-mcpia_plot
-```
+Removed Figure 15
 
 Figures 16, 17, and 18 show the optimal capacity parameter values at a range of budget constraints. Note that the range of allowable adherence capacity is 0-2000, and the noise around an adherence capacity of 0 in Figure 16 means that the adherence intervention never represented a cost-efficient use of funds at any budget value. At the end of this document, we will look a sensitivity analysis in which we find the cutoff point in the unit cost of the adherence intervention at which the intervention becomes viable to some extent in the budget range being considered, because it clearly does not not enter into the realm of possibilities under the current assumptions.
 
@@ -360,7 +365,7 @@ poip_plot
 ```
 
 
-Figure 18 shows that the retention intervention is the most cost-efficient and absorbs the entire budget at low budget values. Around a retention capacity of 1,350, the population of active PrEP users has been effectively saturated in its engagement with the retention intervention. The only way to extract significant additional value from the retention intervention is to also increase the number of individuals who are on PrEP, and the uptake intervention provides a means for achieving this. As the uptake intervention raises the size of the PrEP active population, it opens the door for additional cost-efficient funding of the retention intervention.
+Figure 18 shows that the retention intervention is the most cost-efficient and absorbs the entire budget at low budget values. Around a retention capacity of 1,300, the population of active PrEP users has been effectively saturated in its engagement with the retention intervention. The only way to extract significant additional value from the retention intervention is to also increase the number of individuals who are on PrEP, and the uptake intervention provides a means for achieving this. As the uptake intervention raises the size of the PrEP active population, it opens the door for additional cost-efficient funding of the retention intervention.
 
 
 ```{r}
@@ -385,6 +390,8 @@ res_plot_area_prop <- res_plot %>%
                names_to = "program")
 res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
+saveRDS(res_plot_area_prop, file = "analysis/optim_data/res_plot_area_prop.rda")
+
 ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area()+
   labs(y = "Budget Fraction",
@@ -404,6 +411,8 @@ res_plot_area <- res_plot %>%
                names_to = "program")
 res_plot_area$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
+saveRDS(res_plot_area, file = "analysis/optim_data/res_plot_area.rda")
+
 ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -421,7 +430,7 @@ In Table 1 we can see the numerical summaries for the economic and epidemiologic
 
 Table 1:
 ```{r, fig.width=12, fig.height=8}
-# load("C:/Users/Greg/Desktop/PrEP-Optimize/optim_res_table_costsharing.rda")
+# load("analysis/optim_data/optim_res_table.rda")
 # table_optim <- res
 # library(nima)
 # table_optim <- table_optim %>% mutate(poip_spending = commas(round(poip * cost.i, 0)),
@@ -473,7 +482,7 @@ Table 1:
 #                                                 "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
 #   gsub("@", "$", .)
 
-knitr::include_graphics("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/output_files/Outcome_table_costsharing.png")
+knitr::include_graphics("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/output_files/Outcome_table.png")
 ```
 
 # Sensitivity Analysis
@@ -498,6 +507,8 @@ res_plot_area_prop <- res_plot %>%
                names_to = "program")
 res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
+saveRDS(res_plot_area_prop, file = "analysis/optim_data/res_plot_area_prop_adh.rda")
+
 ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area()+
   labs(y = "Budget Fraction",
@@ -517,6 +528,8 @@ res_plot_area <- res_plot %>%
                names_to = "program")
 res_plot_area$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
+saveRDS(res_plot_area, file = "analysis/optim_data/res_plot_area_adh.rda")
+
 ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -526,6 +539,33 @@ ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0, 0))
+
+```
+
+```{r}
+source("analysis/budget_path_heatmap.R")
+
+fig23 <- ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert_pct)) +
+  geom_tile(aes(x = POIP_c/1000, y = PORC_c/1000, fill = avert_pct)) +
+  stat_contour(color = "black") +
+  scale_fill_gradientn(colours = c("darkred", "orange", "yellow", "white"),
+                       values = scales::rescale(c(0, 5, 7.5, 10))) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_y_continuous(label = comma, expand = c(0,0)) +
+  scale_x_continuous(label = comma, expand = c(0,0)) +
+  coord_cartesian() +
+  labs(title = "",
+       x = "Uptake Budget (per $1,000)",
+       y = "Retention Budget (per $1,000)") +
+  geom_text_contour(aes(z = avert_pct), nudge_x = -50, nudge_y = -50, color = "black", alpha = .5, check_overlap = FALSE) +
+  coord_fixed(ratio = 1) +
+  geom_line(data = res.plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000), linetype = 1, size = 1, color = "black") +
+  geom_point(data = res.plot.labs, aes(x = POIP_c/1000, y = PORC_c/1000), size = 2) +
+  geom_text(data = res.plot.labs, aes(x = POIP_c/1000, y = PORC_c/1000,
+                                      label = paste0("$", round(budget/1000000, 1), "m")), nudge_x = 100, nudge_y = -50) +
+  ggtitle("Figure 23")
+fig23
 
 ```
 
