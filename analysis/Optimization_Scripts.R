@@ -125,7 +125,7 @@ test <- df %>% select(budget, adj.a, poac)
 ###########
 ###########
 # showcasing adherence cost adjustment to produce sensitivity analysis budget allocation figures
-# Generates optim_res_adh_costsharing.rda
+# Generates optim_res_adh.rda
 adj.i <- 1
 adj.a <- .54
 adj.r <- 1
@@ -174,7 +174,7 @@ for (i in 1:n) {
   res$budget[i] <- budget[i]
   res$adj.a <- adj.a
 }
-# save(res, file = "optim_res_adh_costsharing.rda")
+# save(res, file = "optim_res_adh.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%
@@ -208,7 +208,7 @@ ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
 ##########
 ##########
 # Uses basecase costing assumptions
-# Generates optim_res_costsharing.rda
+# Generates optim_res.rda
 adj.i <- 1
 adj.a <- 1
 adj.r <- 1
@@ -256,7 +256,7 @@ for (i in 1:n) {
   res$budget[i] <- budget[i]
 
 }
-# save(res, file = "optim_res_costsharing.rda")
+# save(res, file = "optim_res.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%
@@ -292,7 +292,7 @@ ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
 # Setup for creating table of economic outcomes.
 # Select only specific budget values
 # Uses basecase costing assumptions
-# Generates optim_res_table_costsharing.rda
+# Generates optim_res_table.rda
 
 adj.i <- 1
 adj.a <- 1
@@ -340,7 +340,7 @@ for (i in 1:5) {
   res$converge[i] <- solnp$convergence
   res$budget[i] <- budget[i]
 }
-# save(res, file = "optim_res_table_costsharing.rda")
+# save(res, file = "optim_res_table.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%
