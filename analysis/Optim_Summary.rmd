@@ -28,7 +28,6 @@ These are synonymous with "Uptake Capacity", "Adherence Capacity", and "Retentio
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
-
 # Required packages
 library(dplyr)
 library(psych)
@@ -46,16 +45,16 @@ library(scales)
 library(RColorBrewer)
 
 # Import optimization results
-load("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/optim_data/optim_res_table.rda")
+load("optim_data/optim_res_table.rda")
 table_optim <- res
 
-load("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/optim_data/optim_res_adh.rda")
+load("optim_data/optim_res_adh.rda")
 adh_optim <- res
 
-load("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/optim_data/optim_res.rda")
+load("optim_data/optim_res.rda")
 # Import simulation output
-df_prep <- readRDS("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/data/prepOptim-Yearly-v4-1000sets-250per.rds")
-
+# df_prep <- readRDS("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/data/prepOptim-Yearly-v4-1000sets-250per.rds")
+df_prep <- readRDS("data/prepOptim-Yearly-v4-1000sets-250per.rds")
 # Linear costs for PrEP support program capacities
 cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
 cost.a <- ((315.18+246+3.90) * 10)
@@ -134,7 +133,7 @@ ggplot(df_prep_10yr, aes(x = POIP, y = pCov, color = PORC_cat)) +
        color = "Retention Intervention Capacity Level") +
   theme_classic()
 
-saveRDS(df_prep_10yr, file = "analysis/optim_data/df_prep_10yr.rda")  
+# saveRDS(df_prep_10yr, file = "optim_data/df_prep_10yr.rds")  
 ```
 
 # Statistical Modeling
@@ -148,7 +147,7 @@ gam <- gam(data = df_prep_10yr,
            formula = 100*(infAvert/1199.484) ~ s(POIP, k = 5) + s(POAC_yr, k = 5) + s(PORC, k = 6) + ti(POIP, PORC, k = 6) + ti(POIP, POAC_yr, k = 3) + ti(PORC, POAC_yr, k = 6),
            family = Gamma(link = "log"), method = "REML")
 
-saveRDS(gam, file = "analysis/optim_data/gam.rda")
+# saveRDS(gam, file = "optim_data/gam.rds")
 ```
 
 ### Uptake/Retention Interaction 
@@ -192,7 +191,7 @@ porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == medi
 porc$POIP_cat <- factor(porc$POIP, labels = c("Min Uptake", "Median Uptake", "Max Uptake"))
 porc$POAC_cat <- factor(porc$POAC, labels = c("Min Adherence", "Median Adherence", "Max Adherence"))
 
-saveRDS(porc, file = "analysis/optim_data/fig10_df.rda")
+# saveRDS(porc, file = "optim_data/fig10_df.rds")
 
 ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) + 
   geom_point() + 
@@ -214,7 +213,7 @@ poac <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == medi
 poac$POIP_cat <- factor(poac$POIP, labels = c("Min Uptake", "Median Uptake", "Max Uptake"))
 poac$PORC_cat <- factor(poac$PORC, labels = c("Min Retention", "Median Retention", "Max Retention"))
 
-saveRDS(poac, file = "analysis/optim_data/fig11_df.rda")
+# saveRDS(poac, file = "optim_data/fig11_df.rds")
 
 ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC_cat)) +
   geom_point() + 
@@ -236,7 +235,7 @@ poip <- pred.df %>% filter((PORC == min(PORC) | PORC == max(PORC) | PORC == medi
 poip$POAC_cat <- factor(poip$POAC_yr, labels = c("Min Adherence", "Median Adherence", "Max Adherence"))
 poip$PORC_cat <- factor(poip$PORC, labels = c("Min Retention", "Median Retention", "Max Retention"))
 
-saveRDS(poip, file = "analysis/optim_data/fig12_df.rda")
+# saveRDS(poip, file = "optim_data/fig12_df.rds")
 
 ggplot(poip, aes(x = POIP, y = pred, color = PORC_cat)) + 
   geom_point() + 
@@ -303,7 +302,7 @@ res_plot <- res %>%
          cost_per_inf = budget / (1199.484*infAvert/100),
          marg_cost_per_inf = (budget - lag(budget)) / (1199.484*(infAvert - lag(infAvert)))/100)
 
-saveRDS(res_plot, file = "analysis/optim_data/res_plot.rda")
+# saveRDS(res_plot, file = "optim_data/res_plot.rds")
 
 # plots showing how optimal poip, poac, pocr, and infAvert change with budget constraint
 infections_averted <- ggplot(data = res_plot, aes(x = budget/1000, y = infAvert)) + 
@@ -390,7 +389,7 @@ res_plot_area_prop <- res_plot %>%
                names_to = "program")
 res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
-saveRDS(res_plot_area_prop, file = "analysis/optim_data/res_plot_area_prop.rda")
+# saveRDS(res_plot_area_prop, file = "optim_data/res_plot_area_prop.rds")
 
 ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area()+
@@ -411,7 +410,7 @@ res_plot_area <- res_plot %>%
                names_to = "program")
 res_plot_area$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
-saveRDS(res_plot_area, file = "analysis/optim_data/res_plot_area.rda")
+# saveRDS(res_plot_area, file = "optim_data/res_plot_area.rds")
 
 ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
@@ -482,7 +481,7 @@ Table 1:
 #                                                 "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
 #   gsub("@", "$", .)
 
-knitr::include_graphics("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/output_files/Outcome_table.png")
+knitr::include_graphics("output_files/Outcome_table.png")
 ```
 
 # Sensitivity Analysis
@@ -507,7 +506,7 @@ res_plot_area_prop <- res_plot %>%
                names_to = "program")
 res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
-saveRDS(res_plot_area_prop, file = "analysis/optim_data/res_plot_area_prop_adh.rda")
+# saveRDS(res_plot_area_prop, file = "optim_data/res_plot_area_prop_adh.rds")
 
 ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area()+
@@ -528,7 +527,7 @@ res_plot_area <- res_plot %>%
                names_to = "program")
 res_plot_area$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Uptake", "Retention"))
 
-saveRDS(res_plot_area, file = "analysis/optim_data/res_plot_area_adh.rda")
+# saveRDS(res_plot_area, file = "optim_data/res_plot_area_adh.rds")
 
 ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
@@ -543,7 +542,50 @@ ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
 ```
 
 ```{r}
-source("analysis/budget_path_heatmap.R")
+# source("C:/Users/Greg/Desktop/PrEP-Optimize/analysis/budget_path_heatmap.R")
+gam <- readRDS("optim_data/gam.rds")
+# gam <- readRDS("optim_data/gam.rds")
+#rm(list = setdiff(ls(), c("gam", "vis.gam.custom")))
+
+# Linear costs for PrEP support program capacities
+cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
+cost.a <- ((315.18 + 246 + 3.90) * 10)
+cost.r <- 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
+
+n <- 100
+
+grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = round(n * (.10 * cost.i) / (2000 * cost.r))),
+                       POAC_yr = 0,
+                       PORC = seq(0, 2000, length.out = n))
+pred <- exp(predict(gam,
+                    newdata = grid.df))
+pred.df <- cbind(pred, grid.df)
+
+
+plot.dat <- data.frame(POIP = pred.df$POIP,
+                       PORC = pred.df$PORC,
+                       POIP_c = pred.df$POIP * cost.i,
+                       PORC_c = pred.df$PORC * cost.r,
+                       budget = pred.df$POIP * cost.i + pred.df$PORC * cost.r,
+                       avert_pct = pred.df$pred)
+
+load("optim_data/optim_res.rda")
+res <- res %>% filter(converge == 0)
+res.plot.dat <- data.frame(POIP = res$poip,
+                           PORC = res$porc,
+                           POIP_c = res$poip * cost.i,
+                           PORC_c = res$porc * cost.r,
+                           budget = res$poip * cost.i + res$porc * cost.r,
+                           avert_pct = res$infAvert)
+
+res <- res %>% filter(converge == 0)
+res.plot.labs <- data.frame(POIP = res$poip,
+                           PORC = res$porc,
+                           POIP_c = res$poip * cost.i,
+                           PORC_c = res$porc * cost.r,
+                           budget = res$poip * cost.i + res$porc * cost.r,
+                           avert_pct = res$infAvert) %>% slice(1, 16, 36, 64, 92)
+
 
 fig23 <- ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert_pct)) +
   geom_tile(aes(x = POIP_c/1000, y = PORC_c/1000, fill = avert_pct)) +

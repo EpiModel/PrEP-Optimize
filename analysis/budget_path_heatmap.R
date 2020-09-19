@@ -12,7 +12,8 @@ library(metR)
 library(lubridate)
 library(scales)
 library(RColorBrewer)
-gam <- readRDS("analysis/optim_data/gam.rda")
+gam <- readRDS("analysis/optim_data/gam.rds")
+# gam <- readRDS("optim_data/gam.rds")
 #rm(list = setdiff(ls(), c("gam", "vis.gam.custom")))
 
 # Linear costs for PrEP support program capacities
