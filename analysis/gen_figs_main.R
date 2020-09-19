@@ -26,6 +26,7 @@ fig2 <- ggplot(df_prep_10yr, aes(x = PORC, y = pCov, color = POIP_cat)) +
        x = "Retention Intervention Capacity",
        color = "Initiation Intervention Capacity Level") +
   theme_classic()
+ggsave(filename = "analysis/output_files/Plots/fig2.png")
 
 # Figure 5
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -51,6 +52,7 @@ fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
        color = "Adherence Intervention Capacity",
        title = "Figure 10") +
   theme_classic()
+ggsave(filename = "analysis/output_files/Plots/fig10.png")
 
 # Figure 19
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -65,6 +67,7 @@ fig19 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = progr
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000), max(res_plot_area_prop$budget/1000), by = 500), 1), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0))
+ggsave(filename = "analysis/output_files/Plots/fig19.png")
 
 # Figure 20
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -79,7 +82,7 @@ fig20 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = progr
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0, 0))
-
+ggsave(filename = "analysis/output_files/Plots/fig20.png")
 
 # Figure 21
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -94,6 +97,7 @@ fig21 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = progr
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000), max(res_plot_area_prop$budget/1000), by = 500), 1), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0))
+ggsave(filename = "analysis/output_files/Plots/fig21.png")
 
 # Figure 22
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -108,6 +112,7 @@ fig22 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = progr
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0, 0))
+ggsave(filename = "analysis/output_files/Plots/fig22.png")
 
 # Figure 23 (previously unnumbered)?
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -132,6 +137,7 @@ fig23 <- ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert
   geom_point(data = res.plot.labs, aes(x = POIP_c/1000, y = PORC_c/1000), size = 2) +
   geom_text(data = res.plot.labs, aes(x = POIP_c/1000, y = PORC_c/1000,
                                       label = paste0("$", round(budget/1000000, 1), "m")), nudge_x = 100, nudge_y = -50)
+ggsave(filename = "analysis/output_files/Plots/fig23.png")
 
 # Figure 1: Two panel figure combining Figure 2 and Figure 5 from the summary doc
 # fig 5 is not a ggplot object so my usual way of combining plots with the patchwork package won't work

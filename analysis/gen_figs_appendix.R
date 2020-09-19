@@ -27,6 +27,7 @@ fig1 <- ggplot(df_prep_10yr, aes(x = POAC_yr, y = PrEPHighAdr, color = POIP_cat)
        x = "Yearly Adherence Intervention Capacity",
        color = "Initiation Intervention Capacity Level") +
   theme_classic()
+ggsave(filename = "analysis/output_files/Plots/fig1.png")
 
 # Figure 3
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -40,6 +41,7 @@ fig3 <- ggplot(df_prep_10yr, aes(x = POIP, y = pCov, color = PORC_cat)) +
        x = "PrEP Intervention Initiation Percentage (Uptake Intervention Capacity)",
        color = "Retention Intervention Capacity Level") +
   theme_classic()
+ggsave(filename = "analysis/output_files/Plots/fig3.png")
 
 # Figure 4
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -115,6 +117,7 @@ fig11 <- ggplot(poac, aes(x = POAC_yr, y = pred, color = PORC_cat)) +
        color = "Retention Intervention Capacity",
        title = "Figure 11") +
   theme_classic()
+ggsave(filename = "analysis/output_files/Plots/fig11.png")
 
 # Figure 12
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -128,6 +131,7 @@ fig12 <- ggplot(poip, aes(x = POIP, y = pred, color = PORC_cat)) +
        color = "Retention Intervention Capacity",
        title = "Figure 12") +
   theme_classic()
+ggsave(filename = "analysis/output_files/Plots/fig12.png")
 
 # Figure 13
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -141,6 +145,7 @@ fig13 <- ggplot(data = res_plot, aes(x = budget/1000, y = infAvert)) +
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot$budget/1000), max(res_plot$budget/1000), by = 500), 1), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(0, 10, by = 1), 2), expand = c(0, 0))
+ggsave(filename = "analysis/output_files/Plots/fig13.png")
 
 # Figure 14
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -153,6 +158,7 @@ fig14 <- ggplot(data = res_plot, aes(x = budget/1000, y = cost_per_inf)) +
        title = "Figure 14") +
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot$budget/1000), max(res_plot$budget/1000), by = 500), 1), expand = c(0,0))
+ggsave(filename = "analysis/output_files/Plots/fig14.png")
 
 # Figure 15
 ### Removed ###
@@ -169,6 +175,7 @@ fig16 <- ggplot(data = res_plot, aes(x = budget/1000, y = poac)) +
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot$budget/1000), max(res_plot$budget/1000), by = 500), 1), expand = c(0,0)) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 0.03))
+ggsave(filename = "analysis/output_files/Plots/fig16.png")
 
 # Figure 17
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -182,6 +189,7 @@ fig17 <- ggplot(data = res_plot, aes(x = budget/1000, y = poip)) +
   theme_classic() +
   scale_x_continuous(breaks = round(seq(min(res_plot$budget/1000), max(res_plot$budget/1000), by = 500), 1), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(min(res_plot$poip), max(res_plot$poip), by = 0.01), 2), expand = c(0, 0))
+ggsave(filename = "analysis/output_files/Plots/fig17.png")
 
 # Figure 18
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -195,6 +203,7 @@ fig18 <- porc_plot <- ggplot(data = res_plot, aes(x = budget/1000, y = porc)) +
   theme_classic()+
   scale_x_continuous(breaks = round(seq(min(res_plot$budget/1000), max(res_plot$budget/1000), by = 500), 1), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(100, 2000, by = 100), 2), expand = c(0, 0))
+ggsave(filename = "analysis/output_files/Plots/fig18.png")
 
 # Figure 23
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -220,4 +229,4 @@ fig23 <- ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert
   geom_text(data = res.plot.labs, aes(x = POIP_c/1000, y = PORC_c/1000,
                                       label = paste0("$", round(budget/1000000, 1), "m")), nudge_x = 100, nudge_y = -50)
 
-
+ggsave(filename = "analysis/output_files/Plots/fig23.png")
