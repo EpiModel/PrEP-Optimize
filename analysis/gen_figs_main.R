@@ -20,25 +20,31 @@ df_prep_10yr <- readRDS(file = "analysis/optim_data/df_prep_10yr.rds")
 
 fig2 <- ggplot(df_prep_10yr, aes(x = PORC, y = pCov, color = POIP_cat)) +
   geom_jitter() +
-  scale_color_manual(values = c("#D55E00", "#999999", "#009E73")) +
-  labs(title = "Figure 2",
-       y = "PrEP Coverage Proportion",
+  scale_color_manual(labels = c("Low", "Medium", "High"),
+                     values = c("#D55E00", "#999999", "#009E73")) +
+  labs(y = "PrEP Coverage Proportion",
        x = "Retention Intervention Capacity",
-       color = "Initiation Intervention Capacity Level") +
-  theme_classic()
-ggsave(filename = "analysis/output_files/Plots/fig2.png")
+       color = "Initiation\nCapacity") +
+  theme_bw()
+fig2
+# ggsave(filename = "analysis/output_files/Plots/fig2.png")
+ggsave(filename = "analysis/Fig1a.pdf", height = 6, width = 6)
 
 # Figure 5
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 gam <- readRDS(file = "analysis/optim_data/gam.rda")
 
+pdf("analysis/Fig1b.pdf", height = 6, width = 6)
+par(mar=c(3,3,1,1), mgp = c(2,1,0))
 vis.gam(gam,
         view = c("PORC", "POIP"),
         plot.type = "contour",
         type = "response",
         xlab = "Retention Capacity",
         ylab = "Uptake Capacity",
-        main = "Figure 5: % Infections Averted Contour - Uptake/Retention")
+        main = "")
+dev.off()
+
 
 # Figure 10
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
