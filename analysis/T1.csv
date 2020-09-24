@@ -1,0 +1,13 @@
+Budget constraint,"@700,000","@1,500,000","@3,000,000","@4,500,000","@6,000,000"
+Initiation percentage (%),0.0,0.1,2.3,4.3,6.3
+Adherence capacity,0,0,0,0,0
+Retention capacity,634,"1,300","1,295","1,382","1,460"
+Uptake,0,"64,370","1,569,995","2,973,407","4,387,129"
+Adherence,1,0,0,0,0
+Retention,"699,999","1,435,630","1,430,005","1,526,593","1,612,871"
+Uptake, 0.0, 4.3,52.3,66.1,73.1
+Adherence,0.0,0.0,0.0,0.0,0.0
+Retention,100.0, 95.7, 47.7, 33.9, 26.9
+10-year cumulative infections averted,27.9,42.1,55.9,70.9,86.6
+Percentage 10-year cumulative infections averted (%),2.3,3.5,4.7,5.9,7.2
+Cost per infection averted (@),"25,048","35,613","53,620","63,453","69,281"

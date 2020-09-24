@@ -42,7 +42,8 @@ t_table_optim <- table_optim %>%
   tibble::rownames_to_column() %>%
   pivot_longer(-rowname) %>%
   pivot_wider(names_from=rowname, values_from=value)
-colnames(t_table_optim) <- c("Budget constraint", "@700,000", "@1,500,000", "@3,000,000", "@4,500,000", "@6,000,000")
+colnames(t_table_optim) <- c("Budget constraint", "@700,000", "@1,500,000",
+                             "@3,000,000", "@4,500,000", "@6,000,000")
 
 t_table_optim$"Budget constraint" <- c("Initiation percentage (%)",
                                        "Adherence capacity",
@@ -57,8 +58,11 @@ t_table_optim$"Budget constraint" <- c("Initiation percentage (%)",
                                        "Percentage 10-year cumulative infections averted (%)",
                                        "Cost per infection averted (@)")
 
-t_table_optim %>% kable(format = "html", align = "lrrrrrr", escape = FALSE) %>% pack_rows(index = c("Optimal parameter value" = 3,
-                                                                                                    "Total spending by intervention (@)" = 3,
-                                                                                                    "Percentage of spending by intervention (%)" = 3,
-                                                                                                    "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
+t_table_optim %>% kable(format = "html", align = "lrrrrrr", escape = FALSE) %>%
+  pack_rows(index = c("Optimal parameter value" = 3,
+                      "Total spending by intervention (@)" = 3,
+                      "Percentage of spending by intervention (%)" = 3,
+                      "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
   gsub("@", "$", .)
+
+readr::write_csv(t_table_optim, "analysis/T1.csv")
