@@ -82,11 +82,14 @@ fig19 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = progr
   geom_area()+
   labs(y = "Budget Fraction",
        x = "Total Budget Size (per $1,000)",
-       fill = "Intervention",
-       title = "Figure 19") +
-  theme_classic()+
+       fill = "Intervention") +
+  theme_bw()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000), max(res_plot_area_prop$budget/1000), by = 500), 1), expand = c(0,0)) +
-  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0))
+  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0)) +
+  theme(
+    legend.position = "none"
+  )
+fig19
 ggsave(filename = "analysis/output_files/Plots/fig19.png")
 
 # Figure 20
@@ -97,11 +100,12 @@ fig20 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = progr
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
        x = "Total Budget Size (per $1,000)",
-       fill = "Intervention",
-       title = "Figure 20") +
-  theme_classic()+
+       fill = "Intervention") +
+  theme_bw()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0, 0))
+fig20
+
 ggsave(filename = "analysis/output_files/Plots/fig20.png")
 
 # Figure 21
@@ -112,11 +116,14 @@ fig21 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = progr
   geom_area() +
   labs(y = "Budget Fraction",
        x = "Total Budget Size (per $1,000)",
-       fill = "Intervention",
-       title = "Figure 21") +
-  theme_classic()+
+       fill = "Intervention") +
+  theme_bw()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000), max(res_plot_area_prop$budget/1000), by = 500), 1), expand = c(0,0)) +
-  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0))
+  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0)) +
+  theme(
+    legend.position = "none"
+  )
+fig21
 ggsave(filename = "analysis/output_files/Plots/fig21.png")
 
 # Figure 22
@@ -127,11 +134,11 @@ fig22 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = progr
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
        x = "Total Budget Size (per $1,000)",
-       fill = "Intervention",
-       title = "Figure 22") +
-  theme_classic()+
+       fill = "Intervention") +
+  theme_bw()+
   scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0,0)) +
   scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000), max(res_plot_area$budget/1000), by = 500), 2), expand = c(0, 0))
+fig22
 ggsave(filename = "analysis/output_files/Plots/fig22.png")
 
 # Figure 23 (previously unnumbered)?
@@ -171,7 +178,10 @@ fig10
 
 # Alternatively, Fig 19 and 20 as one two-panel plot, and 21 and 22 as another
 fig19 | fig20
+ggsave("analysis/Fig3.pdf", height = 6, width = 12)
+
 fig21 | fig22
+ggsave("analysis/Fig4.pdf", height = 6, width = 12)
 
 # Or as a 4-panel
 (fig19 | fig20) / (fig21 | fig22)
