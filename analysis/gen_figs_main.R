@@ -22,10 +22,16 @@ fig2 <- ggplot(df_prep_10yr, aes(x = PORC, y = pCov, color = POIP_cat)) +
   geom_jitter() +
   scale_color_manual(labels = c("Low", "Medium", "High"),
                      values = c("#D55E00", "#999999", "#009E73")) +
-  labs(y = "PrEP Coverage Proportion",
-       x = "Retention Intervention Capacity",
-       color = "Initiation\nCapacity") +
-  theme_bw()
+  labs(y = "PrEP Coverage",
+       x = "Retention Capacity",
+       color = "Initiation Capacity") +
+  theme_bw() +
+  theme(
+    # aspect.ratio = 1/4,
+    # strip.background = element_rect(fill = "black"),
+    legend.margin = margin(-8, 0, -2, 0),
+    legend.position = "bottom"
+  )
 fig2
 # ggsave(filename = "analysis/output_files/Plots/fig2.png")
 ggsave(filename = "analysis/Fig1a.pdf", height = 6, width = 6)
@@ -51,13 +57,21 @@ rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 porc <- readRDS(file = "analysis/optim_data/fig10_df.rds")
 
 fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
-  geom_point() +
+  geom_line() +
   facet_wrap(.~as.factor(POIP_cat)) +
-  labs(y = "Predicted Percent Infections Averted (%)",
-       x = "Retention Intervention Capacity",
-       color = "Adherence Intervention Capacity",
-       title = "Figure 10") +
-  theme_classic()
+  labs(y = "Infections Averted (%)",
+       x = "Retention Capacity",
+       color = "Adherence Capacity") +
+  scale_color_manual(labels = c("Low", "Medium", "High"),
+                     values = c("#D55E00", "#999999", "#009E73")) +
+  theme_bw() +
+  theme(
+    legend.margin = margin(-8, 0, -2, 0),
+    legend.position = "bottom"
+  )
+fig10
+ggsave(filename = "analysis/Fig2.pdf", height = 6, width = 12)
+
 ggsave(filename = "analysis/output_files/Plots/fig10.png")
 
 # Figure 19
