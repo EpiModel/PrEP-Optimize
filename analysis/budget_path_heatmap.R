@@ -38,6 +38,8 @@ plot.dat <- data.frame(POIP = pred.df$POIP,
                        budget = pred.df$POIP * cost.i + pred.df$PORC * cost.r,
                        avert_pct = pred.df$pred)
 
+# saveRDS(plot.dat, file = "analysis/optim_data/heatmap_dat.rds")
+
 load("analysis/optim_data/optim_res.rda")
 res <- res %>% filter(converge == 0)
 res.plot.dat <- data.frame(POIP = res$poip,

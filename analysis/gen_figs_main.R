@@ -39,17 +39,45 @@ ggsave(filename = "analysis/Fig1a.pdf", height = 6, width = 6)
 # Figure 5
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 gam <- readRDS(file = "analysis/optim_data/gam.rda")
+contour <- readRDS("analysis/optim_data/heatmap_dat.rds")
 
-pdf("analysis/Fig1b.pdf", height = 6, width = 6)
-par(mar=c(3,3,1,1), mgp = c(2,1,0))
-vis.gam(gam,
-        view = c("PORC", "POIP"),
-        plot.type = "contour",
-        type = "response",
-        xlab = "Retention Capacity",
-        ylab = "Uptake Capacity",
-        main = "")
-dev.off()
+### Using your sample code more directly, if you prefer
+# ggplot(contour, aes(x = POIP, y = PORC, z = avert_pct)) +
+#   geom_raster(aes(fill = avert_pct), interpolate = TRUE) +
+#   geom_contour(aes(z = avert_pct), col = "white", alpha = 0.5, lwd = 0.5) +
+#   geom_text_contour(aes(z = avert_pct), stroke = 0.1, size = 3.5) +
+#   theme_minimal() +
+#   scale_y_continuous(expand = c(0, 0)) +
+#   scale_x_continuous(expand = c(0, 0)) +
+#   labs(y = "Initiation Percentage", x = "Retention Capacity") +
+#   scale_fill_viridis(discrete = FALSE, alpha = 1, option = "D", direction = 1)
+
+### Using an adaption of my previous heatmap ggplot.
+fig5 <- ggplot(data = contour, aes(x = POIP*100, y = PORC, z = avert_pct)) +
+  geom_tile(aes(x = POIP*100, y = PORC, fill = avert_pct)) +
+  stat_contour(color = "black") +
+  scale_fill_gradientn(colours = c("darkred", "orange", "yellow", "white"),
+                       values = scales::rescale(c(0, 5, 7.5, 10))) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_y_continuous(label = comma, expand = c(0,0)) +
+  scale_x_continuous(label = comma, expand = c(0,0)) +
+  coord_cartesian() +
+  labs(title = "",
+       x = "Initiation Percentage (%)",
+       y = "Retention Capacity") +
+  geom_text_contour(aes(z = avert_pct), nudge_x = .5, color = "black", alpha = 1, check_overlap = FALSE)
+
+# pdf("analysis/Fig1b.pdf", height = 6, width = 6)
+# par(mar=c(3,3,1,1), mgp = c(2,1,0))
+# vis.gam(gam,
+#         view = c("PORC", "POIP"),
+#         plot.type = "contour",
+#         type = "response",
+#         xlab = "Retention Capacity",
+#         ylab = "Uptake Capacity",
+#         main = "")
+# dev.off()
 
 
 # Figure 10
