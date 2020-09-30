@@ -341,6 +341,19 @@ for (i in 1:5) {
   res$budget[i] <- budget[i]
 }
 # save(res, file = "optim_res_table.rda")
+load("analysis/optim_data/optim_res_table.rda")
+gam <- readRDS("analysis/optim_data/gam.rds")
+pred.link <- predict(gam,
+                     newdata = data.frame(POIP = res$poip,
+                                          POAC_yr = res$poac,
+                                          PORC = res$porc),
+                     se.fit = TRUE)
+pred <- data.frame(pred = exp(pred.link[[1]]),
+                   pred.ll = exp(pred.link[[1]] - 1.96*pred.link[[2]]),
+                   pred.ul = exp(pred.link[[1]] + 1.96*pred.link[[2]]))
+
+res <- cbind(res, pred)
+saveRDS(res, "analysis/optim_data/optim_res_table.rds")
 
 res_plot <- res %>%
   filter(converge == 0) %>%
