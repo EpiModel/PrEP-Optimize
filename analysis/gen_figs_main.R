@@ -85,7 +85,7 @@ rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 porc <- readRDS(file = "analysis/optim_data/fig10_df.rds")
 
 fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
-  geom_line() +
+  geom_line(size = 1.25) +
   facet_wrap(.~as.factor(POIP_cat)) +
   labs(y = "Infections Averted (%)",
        x = "Retention Capacity",
@@ -97,7 +97,7 @@ fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
     legend.margin = margin(-8, 0, -2, 0),
     legend.position = "bottom"
   ) +
-  geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul))
+  geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul, fill = POAC_cat), alpha = 0.4, linetype = "dashed")
 fig10
 ggsave(filename = "analysis/Fig2.pdf", height = 6, width = 12)
 
