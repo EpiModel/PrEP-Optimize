@@ -199,7 +199,7 @@ porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == medi
 porc$POIP_cat <- factor(porc$POIP, labels = c("Min Uptake", "Median Uptake", "Max Uptake"))
 porc$POAC_cat <- factor(porc$POAC, labels = c("Min Adherence", "Median Adherence", "Max Adherence"))
 
-saveRDS(porc, file = "optim_data/fig10_df.rds")
+# saveRDS(porc, file = "optim_data/fig10_df.rds")
 
 ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) + 
   geom_point() + 
@@ -489,7 +489,7 @@ Table 1:
 #                                                 "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
 #   gsub("@", "$", .)
 
-knitr::include_graphics("output_files/Outcome_table.png")
+#knitr::include_graphics("output_files/Outcome_table.png")
 ```
 
 # Sensitivity Analysis
@@ -502,10 +502,10 @@ res_plot <- adh_optim %>%
   filter(converge == 0) %>%
   rowwise() %>%
   mutate(poip_budget_prop = poip * cost.i / budget,
-         poac_budget_prop = poac * .54 * cost.a / budget,
+         poac_budget_prop = poac * .45 * cost.a / budget,
          porc_budget_prop = porc * cost.r / budget,
          poip_budget = poip * cost.i,
-         poac_budget = poac * .54 * cost.a,
+         poac_budget = poac * .45 * cost.a,
          porc_budget = porc * cost.r)
 
 # plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
@@ -576,9 +576,7 @@ plot.dat <- data.frame(POIP = pred.df$POIP,
                        POIP_c = pred.df$POIP * cost.i,
                        PORC_c = pred.df$PORC * cost.r,
                        budget = pred.df$POIP * cost.i + pred.df$PORC * cost.r,
-                       avert_pct = pred.df$pred,
-                       avert_pct_ll = pred.df$pred.ll,
-                       avert_pct_ul = pred.df$pred.ul)
+                       avert_pct = pred.df$pred)
 
 load("optim_data/optim_res.rda")
 res <- res %>% filter(converge == 0)
