@@ -182,8 +182,16 @@ n = 101
 grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
                        POAC_yr = seq(0, 2000, length.out = n),
                        PORC = seq(0, 2000, length.out = n))
-pred <- exp(predict(gam,
-                newdata = grid.df))
+
+pred.link <- predict(gam,
+                newdata = grid.df,
+                se.fit = TRUE)
+pred <- data.frame(pred = exp(pred.link[[1]]),
+                   pred.ll = exp(pred.link[[1]] - 1.96*pred.link[[2]]),
+                   pred.ul = exp(pred.link[[1]] + 1.96*pred.link[[2]]))
+
+# pred <- exp(predict(gam,
+#                 newdata = grid.df))
 pred.df <- cbind(pred, grid.df)
 
 porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP)) &
@@ -191,7 +199,7 @@ porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == medi
 porc$POIP_cat <- factor(porc$POIP, labels = c("Min Uptake", "Median Uptake", "Max Uptake"))
 porc$POAC_cat <- factor(porc$POAC, labels = c("Min Adherence", "Median Adherence", "Max Adherence"))
 
-# saveRDS(porc, file = "optim_data/fig10_df.rds")
+saveRDS(porc, file = "optim_data/fig10_df.rds")
 
 ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) + 
   geom_point() + 
@@ -557,6 +565,7 @@ n <- 100
 grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = round(n * (.10 * cost.i) / (2000 * cost.r))),
                        POAC_yr = 0,
                        PORC = seq(0, 2000, length.out = n))
+
 pred <- exp(predict(gam,
                     newdata = grid.df))
 pred.df <- cbind(pred, grid.df)
@@ -567,7 +576,9 @@ plot.dat <- data.frame(POIP = pred.df$POIP,
                        POIP_c = pred.df$POIP * cost.i,
                        PORC_c = pred.df$PORC * cost.r,
                        budget = pred.df$POIP * cost.i + pred.df$PORC * cost.r,
-                       avert_pct = pred.df$pred)
+                       avert_pct = pred.df$pred,
+                       avert_pct_ll = pred.df$pred.ll,
+                       avert_pct_ul = pred.df$pred.ul)
 
 load("optim_data/optim_res.rda")
 res <- res %>% filter(converge == 0)

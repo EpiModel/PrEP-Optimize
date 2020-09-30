@@ -49,7 +49,7 @@ contour <- readRDS("analysis/optim_data/heatmap_dat.rds")
 #   theme_minimal() +
 #   scale_y_continuous(expand = c(0, 0)) +
 #   scale_x_continuous(expand = c(0, 0)) +
-#   labs(y = "Initiation Percentage", x = "Retention Capacity") +
+#   labs(x = "Initiation Percentage", y = "Retention Capacity") +
 #   scale_fill_viridis(discrete = FALSE, alpha = 1, option = "D", direction = 1)
 
 ### Using an adaption of my previous heatmap ggplot.
@@ -96,7 +96,8 @@ fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
   theme(
     legend.margin = margin(-8, 0, -2, 0),
     legend.position = "bottom"
-  )
+  ) +
+  geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul))
 fig10
 ggsave(filename = "analysis/Fig2.pdf", height = 6, width = 12)
 
