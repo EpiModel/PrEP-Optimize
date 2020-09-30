@@ -67,7 +67,8 @@ fig5 <- ggplot(data = contour, aes(x = POIP*100, y = PORC, z = avert_pct)) +
        x = "Initiation Percentage (%)",
        y = "Retention Capacity") +
   geom_text_contour(aes(z = avert_pct), nudge_x = .5, color = "black", alpha = 1, check_overlap = FALSE)
-
+fig5
+ggsave(filename = "analysis/Fig1b.pdf", height = 6, width = 6)
 # pdf("analysis/Fig1b.pdf", height = 6, width = 6)
 # par(mar=c(3,3,1,1), mgp = c(2,1,0))
 # vis.gam(gam,
@@ -89,15 +90,18 @@ fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
   facet_wrap(.~as.factor(POIP_cat)) +
   labs(y = "Infections Averted (%)",
        x = "Retention Capacity",
-       color = "Adherence Capacity") +
+       color = "Adherence Capacity",
+       fill = "Adherence Capacity") +
+  geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul, fill = POAC_cat), alpha = 0.4, linetype = "dashed") +
   scale_color_manual(labels = c("Low", "Medium", "High"),
+                     values = c("#D55E00", "#999999", "#009E73")) +
+  scale_fill_manual(labels = c("Low", "Medium", "High"),
                      values = c("#D55E00", "#999999", "#009E73")) +
   theme_bw() +
   theme(
     legend.margin = margin(-8, 0, -2, 0),
     legend.position = "bottom"
-  ) +
-  geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul, fill = POAC_cat), alpha = 0.4, linetype = "dashed")
+  )
 fig10
 ggsave(filename = "analysis/Fig2.pdf", height = 6, width = 12)
 
