@@ -412,10 +412,10 @@
     },
     "fields": {
       "Package": "fields",
-      "Version": "10.3",
+      "Version": "11.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "30bd08fe4cf31558f3d8914694cd8065"
+      "Hash": "db57ed452daca391fcf3f64417ff61a1"
     },
     "forcats": {
       "Package": "forcats",
