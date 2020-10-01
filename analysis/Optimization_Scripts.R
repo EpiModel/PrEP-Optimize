@@ -127,7 +127,7 @@ test <- df %>% select(budget, adj.a, poac)
 # showcasing adherence cost adjustment to produce sensitivity analysis budget allocation figures
 # Generates optim_res_adh.rda
 adj.i <- 1
-adj.a <- .54
+adj.a <- .45
 adj.r <- 1
 
 cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
@@ -174,7 +174,7 @@ for (i in 1:n) {
   res$budget[i] <- budget[i]
   res$adj.a <- adj.a
 }
-# save(res, file = "optim_res_adh.rda")
+ save(res, file = "optim_res_adh.rda")
 
 res_plot <- res %>%
   filter(converge == 0) %>%
@@ -341,35 +341,86 @@ for (i in 1:5) {
   res$budget[i] <- budget[i]
 }
 # save(res, file = "optim_res_table.rda")
+load("analysis/optim_data/optim_res_table.rda")
+gam <- readRDS("analysis/optim_data/gam.rds")
+pred.link <- predict(gam,
+                     newdata = data.frame(POIP = res$poip,
+                                          POAC_yr = res$poac,
+                                          PORC = res$porc),
+                     se.fit = TRUE)
+pred <- data.frame(pred = exp(pred.link[[1]]),
+                   pred.ll = exp(pred.link[[1]] - 1.96*pred.link[[2]]),
+                   pred.ul = exp(pred.link[[1]] + 1.96*pred.link[[2]]))
 
-res_plot <- res %>%
-  filter(converge == 0) %>%
-  rowwise() %>%
-  mutate(poip_budget_prop = poip * cost.i / budget,
-         poac_budget_prop = poac * cost.a / budget,
-         porc_budget_prop = porc * cost.r / budget,
-         poip_budget = poip * cost.i,
-         poac_budget = poac * cost.a,
-         porc_budget = porc * cost.r)
+res <- cbind(res, pred)
+saveRDS(res, "analysis/optim_data/optim_res_table.rds")
 
-# plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
-res_plot_area_prop <- res_plot %>%
-  pivot_longer(cols = c(poip_budget_prop, poac_budget_prop, porc_budget_prop),
-               names_to = "program")
+##########
+##########
+# Setup for creating table of economic outcomes (for sensitivity analysis).
+# Select only specific budget values
+# Uses basecase costing assumptions
+# Generates optim_res_table.rda
 
-ggplot(res_plot_area_prop, aes(x = budget, y = value, fill = program)) +
-  geom_area()
+adj.i <- 1
+adj.a <- .45
+adj.r <- 1
 
-res_plot_area <- res_plot %>%
-  pivot_longer(cols = c(poip_budget, poac_budget, porc_budget),
-               names_to = "program")
-ggplot(res_plot_area, aes(x = budget, y = value, fill = program)) +
-  geom_area()
+cost.i <- adj.i * (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
+cost.a <- adj.a * ((315.18+246+3.90) * 10)
+cost.r <- adj.r * 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
 
-ggplot(data = res_plot, aes(x = budget, y = poip)) + geom_line()
-ggplot(data = res_plot, aes(x = budget, y = poac)) + geom_line()
-ggplot(data = res_plot, aes(x = budget, y = porc)) + geom_line()
-ggplot(data = res_plot, aes(x = budget, y = infAvert)) + geom_line()
+budget_constraint <- function(x) {
+  cost.i * x[1] + cost.a * x[2] + cost.r * x[3]
+}
 
+# number of different budget constraint values to consider
+n = 5
+
+# initialize optimization results data.frame
+res <- data.frame(poip = rep(NA, n),
+                  poac = rep(NA, n),
+                  porc = rep(NA, n),
+                  infAvert = rep(NA, n),
+                  budget = rep(NA, n),
+                  converge = rep(NA, n))
+
+# specify lower and upper bounds for sequence of budgets to consider
+budget <- c(700000, 1500000 , 3000000, 4500000, 6000000)
+for (i in 1:5) {
+  solnp <- solnp(c(.05, 100, 1000),
+                 obj_fun,
+                 eqfun=budget_constraint,
+                 eqB=budget[i],
+                 LB=c(0,0,0),
+                 UB=c(0.10, 2000, 2000),
+                 control = list(rho = 1,
+                                outer.iter = 300,
+                                inner.iter = 10000,
+                                tol =3e-10,
+                                delta = 1.5e-7,
+                                trace = 1))
+  pars <- solnp$pars
+  res$poip[i] <- pars[1]
+  res$poac[i] <- pars[2]
+  res$porc[i] <- pars[3]
+  res$infAvert[i] <- - last(solnp$values)
+  res$converge[i] <- solnp$convergence
+  res$budget[i] <- budget[i]
+}
+
+# gam <- readRDS("analysis/optim_data/gam.rds")
+pred.link <- predict(gam,
+                     newdata = data.frame(POIP = res$poip,
+                                          POAC_yr = res$poac,
+                                          PORC = res$porc),
+                     se.fit = TRUE)
+pred <- data.frame(pred = exp(pred.link[[1]]),
+                   pred.ll = exp(pred.link[[1]] - 1.96*pred.link[[2]]),
+                   pred.ul = exp(pred.link[[1]] + 1.96*pred.link[[2]]))
+
+res <- cbind(res, pred)
+saveRDS(res, "analysis/optim_data/optim_adh_table.rds")
+readRDS("analysis/optim_data/optim_adh_table.rds")
 
 

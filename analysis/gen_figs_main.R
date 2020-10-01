@@ -39,30 +39,63 @@ ggsave(filename = "analysis/Fig1a.pdf", height = 6, width = 6)
 # Figure 5
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 gam <- readRDS(file = "analysis/optim_data/gam.rda")
+contour <- readRDS("analysis/optim_data/heatmap_dat.rds")
 
-pdf("analysis/Fig1b.pdf", height = 6, width = 6)
-par(mar=c(3,3,1,1), mgp = c(2,1,0))
-vis.gam(gam,
-        view = c("PORC", "POIP"),
-        plot.type = "contour",
-        type = "response",
-        xlab = "Retention Capacity",
-        ylab = "Uptake Capacity",
-        main = "")
-dev.off()
+### Using your sample code more directly, if you prefer
+# ggplot(contour, aes(x = POIP, y = PORC, z = avert_pct)) +
+#   geom_raster(aes(fill = avert_pct), interpolate = TRUE) +
+#   geom_contour(aes(z = avert_pct), col = "white", alpha = 0.5, lwd = 0.5) +
+#   geom_text_contour(aes(z = avert_pct), stroke = 0.1, size = 3.5) +
+#   theme_minimal() +
+#   scale_y_continuous(expand = c(0, 0)) +
+#   scale_x_continuous(expand = c(0, 0)) +
+#   labs(x = "Initiation Percentage", y = "Retention Capacity") +
+#   scale_fill_viridis(discrete = FALSE, alpha = 1, option = "D", direction = 1)
+
+### Using an adaption of my previous heatmap ggplot.
+fig5 <- ggplot(data = contour, aes(x = POIP*100, y = PORC, z = avert_pct)) +
+  geom_tile(aes(x = POIP*100, y = PORC, fill = avert_pct)) +
+  stat_contour(color = "black") +
+  scale_fill_gradientn(colours = c("darkred", "orange", "yellow", "white"),
+                       values = scales::rescale(c(0, 5, 7.5, 10))) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_y_continuous(label = comma, expand = c(0,0)) +
+  scale_x_continuous(label = comma, expand = c(0,0)) +
+  coord_cartesian() +
+  labs(title = "",
+       x = "Initiation Percentage (%)",
+       y = "Retention Capacity") +
+  geom_text_contour(aes(z = avert_pct), nudge_x = .5, color = "black", alpha = 1, check_overlap = FALSE)
+fig5
+ggsave(filename = "analysis/Fig1b.pdf", height = 6, width = 6)
+# pdf("analysis/Fig1b.pdf", height = 6, width = 6)
+# par(mar=c(3,3,1,1), mgp = c(2,1,0))
+# vis.gam(gam,
+#         view = c("PORC", "POIP"),
+#         plot.type = "contour",
+#         type = "response",
+#         xlab = "Retention Capacity",
+#         ylab = "Uptake Capacity",
+#         main = "")
+# dev.off()
 
 
 # Figure 10
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 porc <- readRDS(file = "analysis/optim_data/fig10_df.rds")
-
+porc$POIP_cat <- factor(porc$POIP_cat, labels = c("Low Initiation", "Medium Initiation", "High Initiation"))
 fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
-  geom_line() +
+  geom_line(size = 1.25) +
   facet_wrap(.~as.factor(POIP_cat)) +
   labs(y = "Infections Averted (%)",
        x = "Retention Capacity",
-       color = "Adherence Capacity") +
+       color = "Adherence Capacity",
+       fill = "Adherence Capacity") +
+  geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul, fill = POAC_cat), alpha = 0.4, linetype = "dashed") +
   scale_color_manual(labels = c("Low", "Medium", "High"),
+                     values = c("#D55E00", "#999999", "#009E73")) +
+  scale_fill_manual(labels = c("Low", "Medium", "High"),
                      values = c("#D55E00", "#999999", "#009E73")) +
   theme_bw() +
   theme(
@@ -77,6 +110,7 @@ ggsave(filename = "analysis/output_files/Plots/fig10.png")
 # Figure 19
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop.rds")
+res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Initiation", "Retention"))
 
 fig19 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area()+
@@ -95,7 +129,7 @@ ggsave(filename = "analysis/output_files/Plots/fig19.png")
 # Figure 20
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area.rds")
-
+res_plot_area$program <- factor(res_plot_area$program, labels = c("Adherence", "Initiation", "Retention"))
 fig20 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -111,7 +145,7 @@ ggsave(filename = "analysis/output_files/Plots/fig20.png")
 # Figure 21
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop_adh.rds")
-
+res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Initiation", "Retention"))
 fig21 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area() +
   labs(y = "Budget Fraction",
@@ -129,7 +163,7 @@ ggsave(filename = "analysis/output_files/Plots/fig21.png")
 # Figure 22
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area_adh.rds")
-
+res_plot_area$program <- factor(res_plot_area$program, labels = c("Adherence", "Initiation", "Retention"))
 fig22 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -156,7 +190,7 @@ fig23 <- ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert
   scale_x_continuous(label = comma, expand = c(0,0)) +
   coord_cartesian() +
   labs(title = "",
-       x = "Uptake Budget (per $1,000)",
+       x = "Initiation Budget (per $1,000)",
        y = "Retention Budget (per $1,000)") +
   geom_text_contour(aes(z = avert_pct), nudge_x = -50, nudge_y = -50, color = "black", alpha = .5, check_overlap = FALSE) +
   coord_fixed(ratio = 1) +

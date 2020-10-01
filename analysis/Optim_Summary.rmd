@@ -182,8 +182,16 @@ n = 101
 grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = n),
                        POAC_yr = seq(0, 2000, length.out = n),
                        PORC = seq(0, 2000, length.out = n))
-pred <- exp(predict(gam,
-                newdata = grid.df))
+
+pred.link <- predict(gam,
+                newdata = grid.df,
+                se.fit = TRUE)
+pred <- data.frame(pred = exp(pred.link[[1]]),
+                   pred.ll = exp(pred.link[[1]] - 1.96*pred.link[[2]]),
+                   pred.ul = exp(pred.link[[1]] + 1.96*pred.link[[2]]))
+
+# pred <- exp(predict(gam,
+#                 newdata = grid.df))
 pred.df <- cbind(pred, grid.df)
 
 porc <- pred.df %>% filter((POIP == min(POIP) | POIP == max(POIP) | POIP == median(POIP)) &
@@ -481,7 +489,7 @@ Table 1:
 #                                                 "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
 #   gsub("@", "$", .)
 
-knitr::include_graphics("output_files/Outcome_table.png")
+#knitr::include_graphics("output_files/Outcome_table.png")
 ```
 
 # Sensitivity Analysis
@@ -494,10 +502,10 @@ res_plot <- adh_optim %>%
   filter(converge == 0) %>%
   rowwise() %>%
   mutate(poip_budget_prop = poip * cost.i / budget,
-         poac_budget_prop = poac * .54 * cost.a / budget,
+         poac_budget_prop = poac * .45 * cost.a / budget,
          porc_budget_prop = porc * cost.r / budget,
          poip_budget = poip * cost.i,
-         poac_budget = poac * .54 * cost.a,
+         poac_budget = poac * .45 * cost.a,
          porc_budget = porc * cost.r)
 
 # plots showing what fraction of budget is allocated to each intervention as a function of budget constraint
@@ -557,6 +565,7 @@ n <- 100
 grid.df <- expand.grid(POIP = seq(0, 0.10, length.out = round(n * (.10 * cost.i) / (2000 * cost.r))),
                        POAC_yr = 0,
                        PORC = seq(0, 2000, length.out = n))
+
 pred <- exp(predict(gam,
                     newdata = grid.df))
 pred.df <- cbind(pred, grid.df)
