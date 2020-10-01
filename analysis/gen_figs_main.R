@@ -84,7 +84,7 @@ ggsave(filename = "analysis/Fig1b.pdf", height = 6, width = 6)
 # Figure 10
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 porc <- readRDS(file = "analysis/optim_data/fig10_df.rds")
-
+porc$POIP_cat <- factor(porc$POIP_cat, labels = c("Low Initiation", "Medium Initiation", "High Initiation"))
 fig10 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
   geom_line(size = 1.25) +
   facet_wrap(.~as.factor(POIP_cat)) +
@@ -110,6 +110,7 @@ ggsave(filename = "analysis/output_files/Plots/fig10.png")
 # Figure 19
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop.rds")
+res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Initiation", "Retention"))
 
 fig19 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area()+
@@ -128,7 +129,7 @@ ggsave(filename = "analysis/output_files/Plots/fig19.png")
 # Figure 20
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area.rds")
-
+res_plot_area$program <- factor(res_plot_area$program, labels = c("Adherence", "Initiation", "Retention"))
 fig20 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -144,7 +145,7 @@ ggsave(filename = "analysis/output_files/Plots/fig20.png")
 # Figure 21
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop_adh.rds")
-
+res_plot_area_prop$program <- factor(res_plot_area_prop$program, labels = c("Adherence", "Initiation", "Retention"))
 fig21 <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area() +
   labs(y = "Budget Fraction",
@@ -162,7 +163,7 @@ ggsave(filename = "analysis/output_files/Plots/fig21.png")
 # Figure 22
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area_adh.rds")
-
+res_plot_area$program <- factor(res_plot_area$program, labels = c("Adherence", "Initiation", "Retention"))
 fig22 <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -189,7 +190,7 @@ fig23 <- ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert
   scale_x_continuous(label = comma, expand = c(0,0)) +
   coord_cartesian() +
   labs(title = "",
-       x = "Uptake Budget (per $1,000)",
+       x = "Initiation Budget (per $1,000)",
        y = "Retention Budget (per $1,000)") +
   geom_text_contour(aes(z = avert_pct), nudge_x = -50, nudge_y = -50, color = "black", alpha = .5, check_overlap = FALSE) +
   coord_fixed(ratio = 1) +
