@@ -1,3 +1,9 @@
+
+##
+## PrEP Optimization Model
+## Tables
+##
+
 # Load packages
 library(dplyr)
 library(psych)
@@ -17,7 +23,7 @@ library(RColorBrewer)
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 # Linear costs for PrEP support program capacities
 cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
-cost.a <- ((315.18+246+3.90) * 10)
+cost.a <- ((315.18 + 246 + 3.90) * 10)
 cost.r <- 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
 res <- readRDS("analysis/optim_data/optim_res_table.rds")
 table_optim <- res
@@ -91,11 +97,12 @@ readr::write_csv(t_table_optim, "analysis/T1.csv")
 
 
 
-# Sensitivity Analysis Table
+# Sensitivity Analysis Table ----------------------------------------------
+
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 # Linear costs for PrEP support program capacities
 cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
-cost.a <- ((315.18+246+3.90) * 10) * 0.45
+cost.a <- ((315.18 + 246 + 3.90) * 10) * 0.45
 cost.r <- 10 * (60.5 + 0.1*(40*4 + 17.85*2 + 80.31*2 + 9.46*2) + 12.44)
 res <- readRDS("analysis/optim_data/optim_adh_table.rds")
 table_optim <- res
