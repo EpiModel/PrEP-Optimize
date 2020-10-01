@@ -126,3 +126,68 @@ sbatch_master(vars = vars[simno, ],
               ncores = 28,
               walltime = "00:30:00",
               mem = "100G")
+
+
+# Generate Epi Sims for Fitted Budget Optim Values ------------------------
+# October 2020
+
+# Primary table scenarios
+
+POIPs <- c(0, 0,   0.1/100, 2.3/100, 4.3/100, 6.3/100)
+POACs <- c(0, 0,   0,       0,       0,       0)
+PORCs <- c(0, 634, 1300,    1295,    1382,    1460)
+
+vars <- list(POIP = POIPs,
+             PSPO = 0.07,
+             POAC = POACs,
+             PADO = 0.399,
+             PORC = PORCs,
+             PDRO = 1.54)
+vars <- as.data.frame(vars)
+vars
+
+sbatch_master(vars = vars,
+              expand.vars = FALSE,
+              working.dir = "intervention/",
+              master.file = "master.T1.epi.sh",
+              build.runsim = TRUE,
+              runsim.file = "runsim.sh",
+              env.file = "loadR.sh",
+              simno.start = 8000,
+              append = FALSE,
+              ckpt = TRUE,
+              nsims = 252,
+              ncores = 28,
+              walltime = "00:30:00",
+              mem = "100G")
+
+
+# Supplemental table scenarios
+
+POIPs <- c(0, 0,   0,    0,    1.1/100, 3.0/100)
+POACs <- c(0, 0,   0.8,  11.9, 17.4,    18.0)
+PORCs <- c(0, 634, 1261, 1289, 1323,    1364)
+
+vars <- list(POIP = POIPs,
+             PSPO = 0.07,
+             POAC = POACs,
+             PADO = 0.399,
+             PORC = PORCs,
+             PDRO = 1.54)
+vars <- as.data.frame(vars)
+vars
+
+sbatch_master(vars = vars,
+              expand.vars = FALSE,
+              working.dir = "intervention/",
+              master.file = "master.ST1.epi.sh",
+              build.runsim = TRUE,
+              runsim.file = "runsim.sh",
+              env.file = "loadR.sh",
+              simno.start = 8100,
+              append = FALSE,
+              ckpt = TRUE,
+              nsims = 252,
+              ncores = 28,
+              walltime = "00:30:00",
+              mem = "100G")
