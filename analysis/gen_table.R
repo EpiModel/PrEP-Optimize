@@ -172,4 +172,4 @@ t_table_optim %>% kable(format = "html", align = "lrrrrrr", escape = FALSE) %>%
                       "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
   gsub("@", "$", .)
 
-readr::write_csv(t_table_optim, "analysis/T1_sensitivity_analysis.csv")
+readr::write_csv(t_table_optim, "analysis/TS1.csv")
