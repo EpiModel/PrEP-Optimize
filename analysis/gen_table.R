@@ -19,7 +19,7 @@ library(lubridate)
 library(scales)
 library(RColorBrewer)
 
-# Table 1
+# Table 2
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 # Linear costs for PrEP support program capacities
 cost.i <- (12/6 * 10 * (80 * 395 * 100) + (10 * (46.5 + 0.1*(2*40 + 2*17.85 + 2*80.31)) * 80 * 100))
@@ -93,7 +93,7 @@ t_table_optim %>% kable(format = "html", align = "lrrrrrr", escape = FALSE) %>%
                       "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
   gsub("@", "$", .)
 
-readr::write_csv(t_table_optim, "analysis/T1.csv")
+readr::write_csv(t_table_optim, "analysis/T2.csv")
 
 
 
@@ -172,4 +172,4 @@ t_table_optim %>% kable(format = "html", align = "lrrrrrr", escape = FALSE) %>%
                       "Outcomes" = 3)) %>% kable_styling("striped", full_width = TRUE) %>%
   gsub("@", "$", .)
 
-readr::write_csv(t_table_optim, "analysis/TS1.csv")
+readr::write_csv(t_table_optim, "analysis/ST2.csv")
