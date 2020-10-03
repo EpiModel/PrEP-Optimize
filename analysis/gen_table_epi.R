@@ -62,21 +62,24 @@ for (ii in 1:length(scenario_set)) {
                               qnt.low = 0.025, qnt.high = 0.975)
   rr[[4]] <- calc_quants_ir(sim.comp, "ir100",
                             qnt.low = 0.025, qnt.high = 0.975, round = 2)
+  rr[[5]] <- calc_quants_ci(sim.comp, "incid", mult = 1,
+                            qnt.low = 0.025, qnt.high = 0.975, round = 0)
   if (ii > 1) {
     temp <- calc_quants_ia(sim.base, sim.comp, "incid",
                            qnt.low = 0.025, qnt.high = 0.975, nsims = 1000)
-    rr[[5]] <- temp$nia
-    rr[[6]] <- temp$pia
+    rr[[6]] <- temp$nia
+    rr[[7]] <- temp$pia
   } else {
-    rr[[5]] <- NA
     rr[[6]] <- NA
+    rr[[7]] <- NA
   }
 
   rr <- do.call("c", rr)
   tFull[[ii]] <- rr
 }
 
-tFull <- as.data.frame(cbind(scenario_set, do.call("cbind", tFull)))
+tFull <- as.data.frame(do.call("cbind", tFull))
+tFull
 
 readr::write_csv(tFull, "analysis/T2-epi.csv")
 
@@ -105,20 +108,23 @@ for (ii in 1:length(scenario_set)) {
                               qnt.low = 0.025, qnt.high = 0.975)
   rr[[4]] <- calc_quants_ir(sim.comp, "ir100",
                             qnt.low = 0.025, qnt.high = 0.975, round = 2)
+  rr[[5]] <- calc_quants_ci(sim.comp, "incid", mult = 1,
+                            qnt.low = 0.025, qnt.high = 0.975, round = 0)
   if (ii > 1) {
     temp <- calc_quants_ia(sim.base, sim.comp, "incid",
                            qnt.low = 0.025, qnt.high = 0.975, nsims = 1000)
-    rr[[5]] <- temp$nia
-    rr[[6]] <- temp$pia
+    rr[[6]] <- temp$nia
+    rr[[7]] <- temp$pia
   } else {
-    rr[[5]] <- NA
     rr[[6]] <- NA
+    rr[[7]] <- NA
   }
 
   rr <- do.call("c", rr)
   tFull[[ii]] <- rr
 }
 
-tFull <- as.data.frame(cbind(scenario_set, do.call("cbind", tFull)))
+tFull <- as.data.frame(do.call("cbind", tFull))
+tFull
 
 readr::write_csv(tFull, "analysis/ST2-epi.csv")
