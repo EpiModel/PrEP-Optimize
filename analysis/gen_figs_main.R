@@ -32,7 +32,7 @@ fig1a <- ggplot(df_prep_10yr, aes(x = PORC, y = pCov, color = POIP_cat)) +
   scale_color_manual(labels = c("Low", "Medium", "High"),
                      values = c("#D55E00", "#999999", "#009E73")) +
   labs(y = "PrEP Coverage",
-       x = "Retention Capacity",
+       x = "Persistence Capacity",
        color = "Initiation Capacity") +
   theme_bw() +
   theme(
@@ -60,7 +60,7 @@ fig1b <- ggplot(data = contour, aes(x = POIP*100, y = PORC, z = avert_pct)) +
   coord_cartesian() +
   labs(title = "",
        x = "Initiation Percentage (%)",
-       y = "Retention Capacity") +
+       y = "Persistence Capacity") +
   geom_text_contour(aes(z = avert_pct), nudge_x = .5, color = "black", alpha = 1,
                     check_overlap = FALSE)
 fig1b
@@ -77,7 +77,7 @@ ggsave("analysis/Fig1.pdf", height = 6, width = 12)
 #         view = c("PORC", "POIP"),
 #         plot.type = "contour",
 #         type = "response",
-#         xlab = "Retention Capacity",
+#         xlab = "Persistence Capacity",
 #         ylab = "Uptake Capacity",
 #         main = "")
 # dev.off()
@@ -94,7 +94,7 @@ fig2 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
   geom_line(size = 1) +
   facet_wrap(.~as.factor(POIP_cat)) +
   labs(y = "Infections Averted (%)",
-       x = "Retention Capacity",
+       x = "Persistence Capacity",
        color = "Adherence Capacity",
        fill = "Adherence Capacity") +
   geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul, fill = POAC_cat),
@@ -119,7 +119,7 @@ ggsave(filename = "analysis/Fig2.pdf", height = 6, width = 12)
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop.rds")
 res_plot_area_prop$program <- factor(res_plot_area_prop$program,
-                                     labels = c("Adherence", "Initiation", "Retention"))
+                                     labels = c("Adherence", "Initiation", "Persistence"))
 
 fig3a <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area() +
@@ -140,7 +140,7 @@ fig3a
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area.rds")
 res_plot_area$program <- factor(res_plot_area$program,
-                                labels = c("Adherence", "Initiation", "Retention"))
+                                labels = c("Adherence", "Initiation", "Persistence"))
 fig3b <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -166,7 +166,7 @@ ggsave("analysis/Fig3.pdf", height = 6, width = 12)
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop_adh.rds")
 res_plot_area_prop$program <- factor(res_plot_area_prop$program,
-                                     labels = c("Adherence", "Initiation", "Retention"))
+                                     labels = c("Adherence", "Initiation", "Persistence"))
 fig4a <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
   geom_area() +
   labs(y = "Budget Fraction",
@@ -186,7 +186,7 @@ fig4a
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area_adh.rds")
 res_plot_area$program <- factor(res_plot_area$program,
-                                labels = c("Adherence", "Initiation", "Retention"))
+                                labels = c("Adherence", "Initiation", "Persistence"))
 fig4b <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
   geom_area() +
   labs(y = "Funds Allocated (per $,1000)",
@@ -224,7 +224,7 @@ fig23 <- ggplot(data = plot.dat, aes(x = POIP_c/1000, y = PORC_c/1000, z = avert
   coord_cartesian() +
   labs(title = "",
        x = "Initiation Budget (per $1,000)",
-       y = "Retention Budget (per $1,000)") +
+       y = "Persistence Budget (per $1,000)") +
   geom_text_contour(aes(z = avert_pct), nudge_x = -50, nudge_y = -50,
                     color = "black", alpha = .5, check_overlap = FALSE) +
   coord_fixed(ratio = 1) +
