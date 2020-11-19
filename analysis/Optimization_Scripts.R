@@ -20,8 +20,14 @@ df_prep_10yr <- full_join(df_prep %>% group_by(scenario) %>%
                             summarise_at(vars(incid, infAvert, PrEPStarts),
                                          sum),
                           df_prep %>% group_by(scenario) %>%
-                            summarise_at(vars(PrEPHighAdr, prepElig, prepCurr, pCov, PrEPHighAdr),
+                            summarise_at(vars(PrEPHighAdr, prepElig, prepCurr, PrEPHighAdr),
                                          mean),
+                          by="scenario")
+
+df_prep_10yr <- full_join(df_prep_10yr,
+                          df_prep %>% group_by(scenario) %>%
+                            summarise_at(vars(pCov),
+                                         last),
                           by="scenario")
 
 df_prep_10yr <- full_join(df_prep_10yr,
