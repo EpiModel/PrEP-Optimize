@@ -59,7 +59,7 @@ fig1b <- ggplot(data = contour, aes(x = POIP*100, y = PORC, z = avert_pct)) +
   scale_x_continuous(label = comma, expand = c(0,0)) +
   coord_cartesian() +
   labs(title = "",
-       x = "Initiation Percentage (%)",
+       x = "Initiation Capacity (Probability of Starting Intervention)",
        y = "Persistence Capacity") +
   geom_text_contour(aes(z = avert_pct), nudge_x = .5, color = "black", alpha = 1,
                     check_overlap = FALSE)
