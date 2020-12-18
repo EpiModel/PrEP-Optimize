@@ -19,7 +19,7 @@ library(lubridate)
 library(scales)
 library(RColorBrewer)
 library(patchwork)
-
+library(ggpubr)
 
 # Figure 1 ----------------------------------------------------------------
 
@@ -204,6 +204,96 @@ fig4b
 fig4a | fig4b
 ggsave("analysis/Fig4.pdf", height = 6, width = 12)
 
+
+
+# Figure 3/4 Combined (Big Fig 3) -----------------------------------------
+
+# Panel A
+rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
+res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop.rds")
+res_plot_area_prop$program <- factor(res_plot_area_prop$program,
+                                     labels = c("Adherence", "Initiation", "Persistence"))
+
+fig3a <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
+  geom_area() +
+  labs(y = "Budget Fraction",
+       x = "Total Budget Size (per $1,000)",
+       fill = "Intervention") +
+  theme_bw() +
+  scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000),
+                                        max(res_plot_area_prop$budget/1000),
+                                        by = 500), 1), expand = c(0,0)) +
+  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0)) +
+  theme(
+    legend.position = "none"
+  )
+fig3a
+
+# Panel B
+rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
+res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area.rds")
+res_plot_area$program <- factor(res_plot_area$program,
+                                labels = c("Adherence", "Initiation", "Persistence"))
+fig3b <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
+  geom_area() +
+  labs(y = "Funds Allocated (per $,1000)",
+       x = "Total Budget Size (per $1,000)",
+       fill = "Intervention") +
+  theme_bw() +
+  scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
+                                        max(res_plot_area$budget/1000),
+                                        by = 500), 2), expand = c(0,0)) +
+  scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
+                                        max(res_plot_area$budget/1000),
+                                        by = 500), 2), expand = c(0, 0))
+fig3b
+
+
+# Panel C
+rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
+res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop_adh.rds")
+res_plot_area_prop$program <- factor(res_plot_area_prop$program,
+                                     labels = c("Adherence", "Initiation", "Persistence"))
+fig3c <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
+  geom_area() +
+  labs(y = "Budget Fraction",
+       x = "Total Budget Size (per $1,000)",
+       fill = "Intervention") +
+  theme_bw() +
+  scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000),
+                                        max(res_plot_area_prop$budget/1000),
+                                        by = 500), 1), expand = c(0,0)) +
+  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0)) +
+  theme(
+    legend.position = "none"
+  )
+fig3c
+
+# Panel D
+rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
+res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area_adh.rds")
+res_plot_area$program <- factor(res_plot_area$program,
+                                labels = c("Adherence", "Initiation", "Persistence"))
+fig3d <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
+  geom_area() +
+  labs(y = "Funds Allocated (per $,1000)",
+       x = "Total Budget Size (per $1,000)",
+       fill = "Intervention") +
+  theme_bw() +
+  scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
+                                        max(res_plot_area$budget/1000),
+                                        by = 500), 2), expand = c(0,0)) +
+  scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
+                                        max(res_plot_area$budget/1000),
+                                        by = 500), 2), expand = c(0, 0))
+fig3d
+
+# (fig3a | fig3b) / (fig3c | fig3d) + plot_annotation(tag_levels = 'A')
+# ggsave("analysis/Fig3-4-Comb.pdf", height = 12, width = 12)
+
+ggarrange(fig3a, fig3b, fig3c, fig3d, ncol =2, nrow = 2, common.legend = TRUE,
+          legend="bottom", labels = "AUTO")
+ggsave("analysis/Fig3-4-Comb.pdf", height = 10, width = 10)
 
 
 # Other -------------------------------------------------------------------
