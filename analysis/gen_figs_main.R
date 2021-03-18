@@ -32,8 +32,9 @@ fig1a <- ggplot(df_prep_10yr, aes(x = PORC, y = pCov, color = POIP_cat)) +
   scale_color_manual(labels = c("Low", "Medium", "High"),
                      values = c("#D55E00", "#999999", "#009E73")) +
   labs(y = "PrEP Coverage",
-       x = "Persistence Capacity",
+       x = "Persistence Capacity (Max Prevalent Users)",
        color = "Initiation Capacity") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   theme_bw() +
   theme(
     # aspect.ratio = 1/4,
@@ -59,15 +60,20 @@ fig1b <- ggplot(data = contour, aes(x = POIP*100, y = PORC, z = avert_pct)) +
   scale_x_continuous(label = comma, expand = c(0,0)) +
   coord_cartesian() +
   labs(title = "",
-       x = "Initiation Capacity (Probability of Starting Intervention)",
-       y = "Persistence Capacity") +
+       x = "Initiation Capacity (% Chance of Starting Intervention)",
+       y = "Persistence Capacity (Max Prevalent Users)") +
   geom_text_contour(aes(z = avert_pct), nudge_x = .5, color = "black", alpha = 1,
                     check_overlap = FALSE)
 fig1b
 # ggsave(filename = "analysis/Fig1b.pdf", height = 6, width = 6)
 
 fig1a | fig1b
+
+ggarrange(fig1a, fig1b, ncol = 2, nrow = 1, common.legend = FALSE,
+          labels = "AUTO")
+
 ggsave("analysis/Fig1.pdf", height = 6, width = 12)
+ggsave("analysis/Fig1.tiff", height = 6, width = 12, units = "in", dpi = 320)
 
 
 # Older approach with built-in gam plot
@@ -88,8 +94,8 @@ ggsave("analysis/Fig1.pdf", height = 6, width = 12)
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
 porc <- readRDS(file = "analysis/optim_data/fig10_df.rds")
 porc$POIP_cat <- factor(porc$POIP_cat,
-                        labels = c("Low Initiation", "Medium Initiation",
-                                   "High Initiation"))
+                        labels = c("Minimum Initiation", "Medium Initiation",
+                                   "Maximum Initiation"))
 fig2 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
   geom_line(size = 1) +
   facet_wrap(.~as.factor(POIP_cat)) +
@@ -99,9 +105,9 @@ fig2 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
        fill = "Adherence Capacity") +
   geom_ribbon(aes(ymin = pred.ll, ymax = pred.ul, fill = POAC_cat),
               alpha = 0.4, color = NA) +
-  scale_color_manual(labels = c("Low", "Medium", "High"),
+  scale_color_manual(labels = c("Minimum", "Medium", "Maximum"),
                      values = c("#D55E00", "#999999", "#009E73")) +
-  scale_fill_manual(labels = c("Low", "Medium", "High"),
+  scale_fill_manual(labels = c("Minimum", "Medium", "Maximum"),
                      values = c("#D55E00", "#999999", "#009E73")) +
   theme_bw() +
   theme(
@@ -110,103 +116,11 @@ fig2 <- ggplot(porc, aes(x = PORC, y = pred, color = POAC_cat)) +
   )
 fig2
 ggsave(filename = "analysis/Fig2.pdf", height = 6, width = 12)
+ggsave("analysis/Fig2.tiff", height = 6, width = 12, units = "in", dpi = 320)
 
 
 
 # Figure 3 ----------------------------------------------------------------
-
-# Panel A
-rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
-res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop.rds")
-res_plot_area_prop$program <- factor(res_plot_area_prop$program,
-                                     labels = c("Adherence", "Initiation", "Persistence"))
-
-fig3a <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
-  geom_area() +
-  labs(y = "Budget Fraction",
-       x = "Total Budget Size (per $1,000)",
-       fill = "Intervention") +
-  theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000),
-                                        max(res_plot_area_prop$budget/1000),
-                                        by = 500), 1), expand = c(0,0)) +
-  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0)) +
-  theme(
-    legend.position = "none"
-  )
-fig3a
-
-# Panel B
-rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
-res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area.rds")
-res_plot_area$program <- factor(res_plot_area$program,
-                                labels = c("Adherence", "Initiation", "Persistence"))
-fig3b <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
-  geom_area() +
-  labs(y = "Funds Allocated (per $,1000)",
-       x = "Total Budget Size (per $1,000)",
-       fill = "Intervention") +
-  theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
-                                        max(res_plot_area$budget/1000),
-                                        by = 500), 2), expand = c(0,0)) +
-  scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
-                                        max(res_plot_area$budget/1000),
-                                        by = 500), 2), expand = c(0, 0))
-fig3b
-
-fig3a | fig3b
-ggsave("analysis/Fig3.pdf", height = 6, width = 12)
-
-
-
-# Figure 4 ----------------------------------------------------------------
-
-# Panel A
-rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
-res_plot_area_prop <- readRDS(file = "analysis/optim_data/res_plot_area_prop_adh.rds")
-res_plot_area_prop$program <- factor(res_plot_area_prop$program,
-                                     labels = c("Adherence", "Initiation", "Persistence"))
-fig4a <- ggplot(res_plot_area_prop, aes(x = budget/1000, y = value, fill = program)) +
-  geom_area() +
-  labs(y = "Budget Fraction",
-       x = "Total Budget Size (per $1,000)",
-       fill = "Intervention") +
-  theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(res_plot_area_prop$budget/1000),
-                                        max(res_plot_area_prop$budget/1000),
-                                        by = 500), 1), expand = c(0,0)) +
-  scale_y_continuous(breaks = round(seq(0, 1, by = .1), 2), expand = c(0, 0)) +
-  theme(
-    legend.position = "none"
-  )
-fig4a
-
-# Panel B
-rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
-res_plot_area <- readRDS(file = "analysis/optim_data/res_plot_area_adh.rds")
-res_plot_area$program <- factor(res_plot_area$program,
-                                labels = c("Adherence", "Initiation", "Persistence"))
-fig4b <- ggplot(res_plot_area, aes(x = budget/1000, y = value/1000, fill = program)) +
-  geom_area() +
-  labs(y = "Funds Allocated (per $,1000)",
-       x = "Total Budget Size (per $1,000)",
-       fill = "Intervention") +
-  theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
-                                        max(res_plot_area$budget/1000),
-                                        by = 500), 2), expand = c(0,0)) +
-  scale_y_continuous(breaks = round(seq(min(res_plot_area$budget/1000),
-                                        max(res_plot_area$budget/1000),
-                                        by = 500), 2), expand = c(0, 0))
-fig4b
-
-fig4a | fig4b
-ggsave("analysis/Fig4.pdf", height = 6, width = 12)
-
-
-
-# Figure 3/4 Combined (Big Fig 3) -----------------------------------------
 
 # Panel A
 rm(list = setdiff(ls(), grep("fig", ls(), value = TRUE)))
@@ -291,9 +205,10 @@ fig3d
 # (fig3a | fig3b) / (fig3c | fig3d) + plot_annotation(tag_levels = 'A')
 # ggsave("analysis/Fig3-4-Comb.pdf", height = 12, width = 12)
 
-ggarrange(fig3a, fig3b, fig3c, fig3d, ncol =2, nrow = 2, common.legend = TRUE,
-          legend="bottom", labels = "AUTO")
-ggsave("analysis/Fig3-4-Comb.pdf", height = 10, width = 10)
+ggarrange(fig3a, fig3b, fig3c, fig3d, ncol = 2, nrow = 2, common.legend = TRUE,
+          legend = "bottom", labels = "AUTO")
+ggsave("analysis/Fig3.pdf", height = 10, width = 10)
+ggsave("analysis/Fig3.tiff", height = 10, width = 10, units = "in", dpi = 320)
 
 
 # Other -------------------------------------------------------------------
