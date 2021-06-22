@@ -4,7 +4,7 @@ This repository holds the source to code to reproduce the analysis featured in o
 
 ## Citation
 
-> Jenness SM, Knowlton G, Smith DK, Marcus JL, Anderson EJ, Siegler AJ, Jones J, Sullivan PS, Enns E. A Decision Analytics Model to Optimize Investment in Interventions Targeting the HIV PrEP Cascade of Care. _Under Review_. Pre-Print: [[LINK]](https://doi.org/10.1101/2020.12.10.20247270)
+> Jenness SM, Knowlton G, Smith DK, Marcus JL, Anderson EJ, Siegler AJ, Jones J, Sullivan PS, Enns E. A Decision Analytics Model to Optimize Investment in Interventions Targeting the HIV PrEP Cascade of Care. AIDS. 2021. Online ahead of print. [DOI: 10.1097/QAD.0000000000002909.](https://doi.org/10.1097/QAD.0000000000002909)
 
 <img src="https://github.com/EpiModel/PrEP-Optimize/raw/master/analysis/Fig1.jpg">
 
@@ -49,4 +49,4 @@ or in "~/.Renviron":
 GITHUB_PAT="<your github private access token>"
 ```
 
-<img src="https://github.com/EpiModel/PrEP-Optimize/raw/master/analysis/Fig3-4-Comb.jpg">
+<img src="https://github.com/EpiModel/PrEP-Optimize/raw/master/analysis/Fig3.jpg">
